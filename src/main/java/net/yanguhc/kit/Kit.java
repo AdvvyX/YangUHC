@@ -21,6 +21,7 @@ public class Kit {
     private ItemStack boots;
     private ItemStack offHand;
     private int delaySeconds = 0;
+    private boolean enabled = true;
     private final List<PotionEffect> effects = new ArrayList<>();
 
     public Kit(String name) {
@@ -29,6 +30,14 @@ public class Kit {
 
     public String getName() {
         return name;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public List<ItemStack> getItems() {

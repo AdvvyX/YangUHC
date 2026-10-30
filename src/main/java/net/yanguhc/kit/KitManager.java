@@ -20,7 +20,7 @@ import java.util.*;
 public class KitManager {
 
     private final YangUHC plugin;
-    private final Map<String, Kit> kits = new HashMap<>();
+    private final Map<String, Kit> kits = new LinkedHashMap<>();
     private String starterKitName = "starter";
     private File file;
     private FileConfiguration config;
@@ -47,6 +47,7 @@ public class KitManager {
         initial.set("starter-kit", "starter");
 
         // Default Starter Kit: Leather armor, stone tools, food, 3 feathers, 3 string
+        initial.set("kits.starter.enabled", true);
         initial.set("kits.starter.delay-seconds", 0);
         initial.set("kits.starter.helmet", new ItemBuilder(Material.LEATHER_HELMET).unbreakable(true).build());
         initial.set("kits.starter.chestplate", new ItemBuilder(Material.LEATHER_CHESTPLATE).unbreakable(true).build());
@@ -64,7 +65,8 @@ public class KitManager {
         );
         initial.set("kits.starter.items", items);
 
-        // Delayed Kit example: "caterer" delivered at 10 minutes (600s)
+        // Delayed Kit example: "food_drop" delivered at 10 minutes (600s)
+        initial.set("kits.food_drop.enabled", true);
         initial.set("kits.food_drop.delay-seconds", 600);
         initial.set("kits.food_drop.items", Arrays.asList(
                 new ItemBuilder(Material.GOLDEN_APPLE, 2).name("<gold>Manzana de Apoyo").build(),
@@ -88,6 +90,7 @@ public class KitManager {
 
         for (String key : section.getKeys(false)) {
             Kit kit = new Kit(key);
+            kit.setEnabled(section.getBoolean(key + ".enabled", true));
             kit.setDelaySeconds(section.getInt(key + ".delay-seconds", 0));
             kit.setHelmet(section.getItemStack(key + ".helmet"));
             kit.setChestplate(section.getItemStack(key + ".chestplate"));
@@ -110,6 +113,7 @@ public class KitManager {
     public void saveKit(Kit kit) {
         kits.put(kit.getName().toLowerCase(), kit);
         String path = "kits." + kit.getName().toLowerCase();
+        config.set(path + ".enabled", kit.isEnabled());
         config.set(path + ".delay-seconds", kit.getDelaySeconds());
         config.set(path + ".helmet", kit.getHelmet());
         config.set(path + ".chestplate", kit.getChestplate());
@@ -127,6 +131,7 @@ public class KitManager {
 
     public void createKitFromPlayer(String name, Player player, int delaySeconds) {
         Kit kit = new Kit(name.toLowerCase());
+        kit.setEnabled(true);
         kit.setDelaySeconds(delaySeconds);
 
         PlayerInventory inv = player.getInventory();
@@ -189,6 +194,25 @@ public class KitManager {
         return Collections.unmodifiableCollection(kits.values());
     }
 
+    public List<Kit> getEnabledKits() {
+        List<Kit> list = new ArrayList<>();
+        for (Kit k : kits.values()) {
+            if (k.isEnabled()) list.add(k);
+        }
+        return list;
+    }
+
+    public void setAllKitsEnabled(boolean enabled) {
+        for (Kit kit : kits.values()) {
+            kit.setEnabled(enabled);
+            config.set("kits." + kit.getName().toLowerCase() + ".enabled", enabled);
+        }
+        try {
+            config.save(file);
+        } catch (IOException ignored) {
+        }
+    }
+
     public void cancelPendingTasks() {
         for (BukkitTask task : scheduledKitTasks) {
             if (task != null && !task.isCancelled()) {
@@ -200,20 +224,38 @@ public class KitManager {
 
     public void giveStarterKits() {
         cancelPendingTasks();
-        Kit starter = getStarterKit();
-        if (starter == null) return;
 
-        int delay = starter.getDelaySeconds();
-        if (delay <= 0) {
+        List<Kit> enabledImmediateKits = new ArrayList<>();
+        List<Kit> enabledDelayedKits = new ArrayList<>();
+
+        for (Kit kit : kits.values()) {
+            if (!kit.isEnabled()) continue;
+            if (kit.getDelaySeconds() <= 0) {
+                enabledImmediateKits.add(kit);
+            } else {
+                enabledDelayedKits.add(kit);
+            }
+        }
+
+        // Apply immediate enabled kits at match start
+        if (!enabledImmediateKits.isEmpty()) {
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (plugin.getGameManager().isAlive(p)) {
-                    starter.apply(p);
+                    for (Kit kit : enabledImmediateKits) {
+                        kit.apply(p);
+                    }
                 }
             }
             starterGiven = true;
-        } else {
-            plugin.getMessages().broadcast("kits.delayed-warning", "seconds", delay);
-            BukkitTask starterTask = new BukkitRunnable() {
+            plugin.getMessages().broadcast("kits.delivered-broadcast");
+        }
+
+        // Schedule delayed enabled kits
+        for (Kit kit : enabledDelayedKits) {
+            int kitDelay = kit.getDelaySeconds();
+            plugin.getMessages().broadcast("kits.delayed-warning", "kit", kit.getName(), "seconds", kitDelay);
+
+            BukkitTask delayedTask = new BukkitRunnable() {
                 @Override
                 public void run() {
                     if (!plugin.getGameManager().getState().isGameActive()) {
@@ -222,38 +264,13 @@ public class KitManager {
                     }
                     for (Player p : Bukkit.getOnlinePlayers()) {
                         if (plugin.getGameManager().isAlive(p)) {
-                            starter.apply(p);
+                            kit.apply(p);
                         }
                     }
-                    starterGiven = true;
-                    plugin.getMessages().broadcast("kits.delivered-broadcast");
+                    plugin.getMessages().broadcast("kits.special-event", "kit", kit.getName());
                 }
-            }.runTaskLater(plugin, delay * 20L);
-            scheduledKitTasks.add(starterTask);
-        }
-
-        // Schedule other delayed kits if any
-        for (Kit kit : kits.values()) {
-            if (kit == starter) continue;
-            int kitDelay = kit.getDelaySeconds();
-            if (kitDelay > 0) {
-                BukkitTask delayedTask = new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        if (!plugin.getGameManager().getState().isGameActive()) {
-                            cancel();
-                            return;
-                        }
-                        for (Player p : Bukkit.getOnlinePlayers()) {
-                            if (plugin.getGameManager().isAlive(p)) {
-                                kit.apply(p);
-                            }
-                        }
-                        plugin.getMessages().broadcast("kits.special-event", "kit", kit.getName());
-                    }
-                }.runTaskLater(plugin, kitDelay * 20L);
-                scheduledKitTasks.add(delayedTask);
-            }
+            }.runTaskLater(plugin, kitDelay * 20L);
+            scheduledKitTasks.add(delayedTask);
         }
     }
 

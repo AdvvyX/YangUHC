@@ -45,11 +45,19 @@ public class KitManagerGUI implements Listener, InventoryHolder {
 
     public void refresh() {
         inventory.clear();
-        String starterName = plugin.getKitManager().getStarterKitName();
         int slot = 10;
+        int activeImmediate = 0;
+        int activeDelayed = 0;
+        int disabledCount = 0;
 
         for (Kit kit : plugin.getKitManager().getAllKits()) {
-            boolean isStarter = kit.getName().equalsIgnoreCase(starterName);
+            boolean enabled = kit.isEnabled();
+            if (enabled) {
+                if (kit.getDelaySeconds() == 0) activeImmediate++;
+                else activeDelayed++;
+            } else {
+                disabledCount++;
+            }
 
             Material icon = Material.CHEST;
             if (kit.getChestplate() != null && kit.getChestplate().getType() != Material.AIR) {
@@ -59,26 +67,28 @@ public class KitManagerGUI implements Listener, InventoryHolder {
             }
 
             List<String> lore = new ArrayList<>();
-            lore.add("<gray>Contenido:");
+            lore.add("<gray>Estado:");
+            if (enabled) {
+                lore.add("<green><bold>✔ ACTIVADO (Se entregará en la partida)</bold>");
+            } else {
+                lore.add("<red><bold>✖ DESACTIVADO (No se entregará)</bold>");
+            }
+            lore.add("");
+            lore.add("<gray>Detalles:");
             lore.add("<white>• Ítems: <yellow>" + kit.getItems().size());
             lore.add("<white>• Armadura: " + formatArmor(kit));
             lore.add("<white>• Entrega: <gold>" + (kit.getDelaySeconds() == 0 ? "Al inicio (0s)" : TimeUtil.formatSeconds(kit.getDelaySeconds())));
             lore.add("");
-            if (isStarter) {
-                lore.add("<green><bold>⭐ KIT INICIAL ACTIVO</bold>");
-            } else {
-                lore.add("<gray><italic>Click derecho para marcar como inicial");
-            }
-            lore.add("");
-            lore.add("<aqua>▶ Click Izquierdo: <white>Editar kit en menú interactivo");
-            lore.add("<yellow>▶ Click Derecho: <white>Hacer Kit Inicial");
-            lore.add("<red>▶ Shift + Click Der: <white>Eliminar Kit");
+            lore.add("<yellow>▶ Click Izquierdo: <white>" + (enabled ? "<red>Desactivar" : "<green>Activar") + " entrega");
+            lore.add("<aqua>▶ Click Derecho: <white>Editar contenido en menú");
+            lore.add("<light_purple>▶ Shift + Click Izq: <white>Previsualizar");
+            lore.add("<red>▶ Shift + Click Der: <white>Eliminar kit");
 
             ItemBuilder builder = new ItemBuilder(icon)
-                    .name((isStarter ? "<green><bold>" : "<gold><bold>") + "Kit: " + kit.getName() + "</bold>")
+                    .name((enabled ? "<green><bold>✔ " : "<red><bold>✖ ") + kit.getName() + "</bold>")
                     .lore(lore);
 
-            if (isStarter) {
+            if (enabled) {
                 builder.enchant(Enchantment.UNBREAKING, 1).flags(ItemFlag.HIDE_ENCHANTS);
             }
 
@@ -104,6 +114,28 @@ public class KitManagerGUI implements Listener, InventoryHolder {
         }
 
         // Action Buttons in bottom row
+        ItemStack disableAllBtn = new ItemBuilder(Material.REDSTONE_BLOCK)
+                .name("<red><bold>✖ Desactivar Todos los Kits</bold>")
+                .lore(
+                        "<gray>Ningún kit se entregará durante",
+                        "<gray>la partida de UHC.",
+                        "",
+                        "<yellow>Haz click para desactivar todos."
+                )
+                .build();
+        inventory.setItem(45, disableAllBtn);
+
+        ItemStack enableAllBtn = new ItemBuilder(Material.EMERALD_BLOCK)
+                .name("<green><bold>✔ Activar Todos los Kits</bold>")
+                .lore(
+                        "<gray>Activa todos los kits configurados",
+                        "<gray>para ser entregados en la partida.",
+                        "",
+                        "<yellow>Haz click para activar todos."
+                )
+                .build();
+        inventory.setItem(46, enableAllBtn);
+
         ItemStack createBtn = new ItemBuilder(Material.EMERALD)
                 .name("<green><bold>➕ Crear Nuevo Kit</bold>")
                 .lore(
@@ -113,20 +145,22 @@ public class KitManagerGUI implements Listener, InventoryHolder {
                         "<yellow>Haz click para crear."
                 )
                 .build();
-        inventory.setItem(48, createBtn);
+        inventory.setItem(49, createBtn);
 
-        Kit starterKit = plugin.getKitManager().getStarterKit();
-        int currentDelay = starterKit != null ? starterKit.getDelaySeconds() : 0;
-        ItemStack delayBtn = new ItemBuilder(Material.CLOCK)
-                .name("<gold><bold>⏱ Demora del Kit Inicial</bold>")
+        ItemStack summaryBtn = new ItemBuilder(Material.BOOK)
+                .name("<gold><bold>Información de Kits en Partida</bold>")
                 .lore(
-                        "<gray>Tiempo actual: <yellow>" + (currentDelay == 0 ? "Inmediato (0s)" : currentDelay + "s"),
+                        "<gray>Resumen de configuración actual:",
+                        "<green>• Kits activos al inicio (0s): <white>" + activeImmediate,
+                        "<aqua>• Kits activos con demora: <white>" + activeDelayed,
+                        "<red>• Kits desactivados: <white>" + disabledCount,
                         "",
-                        "<green>▶ Click Izquierdo: <white>+30 segundos",
-                        "<red>▶ Click Derecho: <white>Restablecer a 0s (Inmediato)"
+                        "<gray>Los kits <green>ACTIVADOS</green> se entregarán",
+                        "<gray>automáticamente al iniciar la partida o",
+                        "<gray>al cumplirse su tiempo programado."
                 )
                 .build();
-        inventory.setItem(50, delayBtn);
+        inventory.setItem(53, summaryBtn);
     }
 
     private String formatArmor(Kit kit) {
@@ -148,34 +182,34 @@ public class KitManagerGUI implements Listener, InventoryHolder {
         if (clicked == null || clicked.getType() == Material.BLACK_STAINED_GLASS_PANE) return;
 
         if (!player.isOp() && !player.hasPermission("yanguhc.admin") && !player.hasPermission("yanguhc.host")) {
-            TextUtil.sendMessage(player, "<red>Solo administradores u operadores pueden gestionar kits.");
+            plugin.getMessages().send(player, "general.no-permission");
             return;
         }
 
-        // Click on "Crear Nuevo Kit"
-        if (clicked.getType() == Material.EMERALD) {
-            String newKitName = "kit_" + (plugin.getKitManager().getAllKits().size() + 1);
-            plugin.getKitManager().createKitFromPlayer(newKitName, player, 0);
-            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+        // Action: Desactivar todos los kits
+        if (event.getSlot() == 45 && clicked.getType() == Material.REDSTONE_BLOCK) {
+            plugin.getKitManager().setAllKitsEnabled(false);
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.8f);
+            TextUtil.sendMessage(player, "<red>Todos los kits han sido desactivados para la partida.");
             refresh();
             return;
         }
 
-        // Click on "Demora del Kit Inicial"
-        if (clicked.getType() == Material.CLOCK) {
-            Kit starter = plugin.getKitManager().getStarterKit();
-            if (starter != null) {
-                if (event.isRightClick()) {
-                    starter.setDelaySeconds(0);
-                } else {
-                    int next = starter.getDelaySeconds() + 30;
-                    if (next > 1800) next = 0;
-                    starter.setDelaySeconds(next);
-                }
-                plugin.getKitManager().saveKit(starter);
-                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1f, 1.2f);
-                refresh();
-            }
+        // Action: Activar todos los kits
+        if (event.getSlot() == 46 && clicked.getType() == Material.EMERALD_BLOCK) {
+            plugin.getKitManager().setAllKitsEnabled(true);
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.2f);
+            TextUtil.sendMessage(player, "<green>Todos los kits han sido activados para la partida.");
+            refresh();
+            return;
+        }
+
+        // Action: Crear Nuevo Kit
+        if (event.getSlot() == 49 && clicked.getType() == Material.EMERALD) {
+            String newKitName = "kit_" + (plugin.getKitManager().getAllKits().size() + 1);
+            plugin.getKitManager().createKitFromPlayer(newKitName, player, 0);
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+            refresh();
             return;
         }
 
@@ -189,18 +223,29 @@ public class KitManagerGUI implements Listener, InventoryHolder {
                 if (event.getClick() == ClickType.SHIFT_RIGHT) {
                     // Delete Kit
                     plugin.getKitManager().deleteKit(kit.getName());
-                    TextUtil.sendMessage(player, "<red>El kit <bold>" + kit.getName() + "</bold> ha sido eliminado.");
+                    plugin.getMessages().send(player, "kits.deleted", "kit", kit.getName());
                     player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1f, 1f);
                     refresh();
+                } else if (event.getClick() == ClickType.MIDDLE || event.getClick() == ClickType.SHIFT_LEFT) {
+                    // Preview Kit
+                    plugin.getKitGUI().openPreview(player, kit);
                 } else if (event.isRightClick()) {
-                    // Set as Starter
-                    plugin.getKitManager().setStarterKitName(kit.getName());
-                    TextUtil.sendMessage(player, "<green>El kit <bold>" + kit.getName() + "</bold> es ahora el kit inicial de la partida.");
-                    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
-                    refresh();
-                } else if (event.isLeftClick()) {
                     // Open Kit Interactive Editor
                     plugin.getKitEditorGUI().open(player, kit);
+                } else if (event.isLeftClick()) {
+                    // Toggle Enabled / Disabled
+                    boolean newState = !kit.isEnabled();
+                    kit.setEnabled(newState);
+                    plugin.getKitManager().saveKit(kit);
+
+                    if (newState) {
+                        player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.2f);
+                        plugin.getMessages().send(player, "kits.enabled", "kit", kit.getName());
+                    } else {
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.9f);
+                        plugin.getMessages().send(player, "kits.disabled", "kit", kit.getName());
+                    }
+                    refresh();
                 }
             }
         }

@@ -60,11 +60,13 @@ border:
 # Kits
 kits:
   received: "<green>¡Has recibido el kit <bold>{kit}</bold>!"
-  delayed-warning: "<yellow><bold>KITS</bold> <gray>» El kit inicial se entregará en <gold>{seconds} segundos</gold>!"
+  delayed-warning: "<yellow><bold>KITS</bold> <gray>» El kit <gold>{kit}</gold> se entregará en <gold>{seconds} segundos</gold>!"
   delivered-broadcast: "<green><bold>¡KITS ENTREGADOS!</bold> <gray>Todos los jugadores vivos recibieron su equipamiento."
   special-event: "<aqua><bold>EVENTO KIT</bold> <gray>» ¡Se ha entregado el kit especial <bold>{kit}</bold> a los jugadores vivos!"
   saved: "<green>¡Kit <bold>{kit}</bold> guardado exitosamente!"
   deleted: "<red>El kit <bold>{kit}</bold> ha sido eliminado."
+  enabled: "<green>El kit <bold>{kit}</bold> ha sido <bold>activado</bold> para esta partida."
+  disabled: "<red>El kit <bold>{kit}</bold> ha sido <bold>desactivado</bold> para esta partida."
   set-starter: "<green>El kit <bold>{kit}</bold> es ahora el kit inicial de la partida."
   not-found: "<red>Kit no encontrado."
 
