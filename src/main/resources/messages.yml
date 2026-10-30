@@ -86,6 +86,7 @@ scenarios:
 # Equipos (Teams)
 teams:
   created: "<green>Has creado el equipo <bold>{team}</bold> exitosamente."
+  auto-created: "<yellow><bold>TEAMS</bold> <gray>» <green>Se te ha asignado automáticamente el <bold>{team}</bold> para la partida."
   already-in: "<red>¡Ya perteneces a un equipo!"
   must-leave-first: "<red>Ya estás en un equipo. Sal primero usando /team leave."
   joined: "<green>{player} se ha unido al equipo."

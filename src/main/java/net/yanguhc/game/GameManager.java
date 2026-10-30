@@ -86,6 +86,11 @@ public class GameManager {
             return;
         }
 
+        // Auto-assign solo teams to any players who don't have a team yet
+        if (plugin.getTeamManager().isTeamsEnabled()) {
+            plugin.getTeamManager().autoAssignSoloTeams();
+        }
+
         setState(GameState.SCATTERING);
         alivePlayers.clear();
         spectators.clear();

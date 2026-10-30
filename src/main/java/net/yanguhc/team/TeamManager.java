@@ -2,6 +2,7 @@ package net.yanguhc.team;
 
 import net.yanguhc.YangUHC;
 import net.yanguhc.util.TextUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -76,13 +77,17 @@ public class TeamManager {
     }
 
     public Team createTeam(Player leader) {
+        return createTeam(leader, "Equipo #" + (teams.size() + 1), true);
+    }
+
+    public Team createTeam(Player leader, String customName, boolean notify) {
         if (getTeam(leader) != null) {
-            plugin.getMessages().send(leader, "teams.already-in");
+            if (notify) plugin.getMessages().send(leader, "teams.already-in");
             return null;
         }
 
         String id = "team-" + (teamCounter++);
-        String name = "Equipo #" + (teams.size() + 1);
+        String name = customName != null ? customName : "Equipo #" + (teams.size() + 1);
         Team team = new Team(id, name, leader.getUniqueId());
 
         String color = TEAM_COLORS[(teams.size()) % TEAM_COLORS.length];
@@ -91,8 +96,23 @@ public class TeamManager {
         teams.put(id, team);
         playerTeamMap.put(leader.getUniqueId(), team);
 
-        plugin.getMessages().send(leader, "teams.created", "team", name);
+        if (notify) {
+            plugin.getMessages().send(leader, "teams.created", "team", name);
+        }
         return team;
+    }
+
+    public void autoAssignSoloTeams() {
+        if (!isTeamsEnabled()) return;
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (getTeam(p) == null) {
+                String teamName = "Equipo " + p.getName();
+                Team team = createTeam(p, teamName, false);
+                if (team != null) {
+                    plugin.getMessages().send(p, "teams.auto-created", "team", teamName);
+                }
+            }
+        }
     }
 
     public boolean joinTeam(Player player, Team team) {
@@ -132,36 +152,39 @@ public class TeamManager {
         String msg = plugin.getMessages().getFormatted("teams.left-broadcast", "player", player.getName());
         team.broadcast(msg);
 
+        // Delete team if empty
         if (team.getMembers().isEmpty()) {
             teams.remove(team.getId());
         }
         return true;
     }
 
-    public void invitePlayer(Player inviter, Player target) {
-        Team team = getTeam(inviter);
+    public void invitePlayer(Player leader, Player target) {
+        Team team = getTeam(leader);
         if (team == null) {
-            team = createTeam(inviter);
+            team = createTeam(leader);
         }
 
-        if (!team.getLeader().equals(inviter.getUniqueId())) {
-            TextUtil.sendMessage(inviter, "<red>Solo el líder del equipo puede enviar invitaciones.");
+        if (team == null) return;
+
+        if (!team.getLeader().equals(leader.getUniqueId())) {
+            TextUtil.sendMessage(leader, "<red>Solo el líder del equipo puede invitar jugadores.");
             return;
         }
 
         if (team.getMembers().size() >= maxTeamSize) {
-            plugin.getMessages().send(inviter, "teams.full", "max", maxTeamSize);
+            plugin.getMessages().send(leader, "teams.full", "max", maxTeamSize);
             return;
         }
 
         if (getTeam(target) != null) {
-            TextUtil.sendMessage(inviter, "<red>" + target.getName() + " ya tiene un equipo.");
+            TextUtil.sendMessage(leader, "<red>" + target.getName() + " ya está en un equipo.");
             return;
         }
 
         pendingInvites.put(target.getUniqueId(), team.getId());
-        plugin.getMessages().send(inviter, "teams.invite-sent", "player", target.getName());
-        plugin.getMessages().send(target, "teams.invite-received", "player", inviter.getName());
+        plugin.getMessages().send(leader, "teams.invite-sent", "player", target.getName());
+        plugin.getMessages().send(target, "teams.invite-received", "player", leader.getName());
     }
 
     public boolean acceptInvite(Player player) {
