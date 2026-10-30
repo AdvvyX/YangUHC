@@ -39,7 +39,7 @@ public class GameListener implements Listener {
 
         if (state == GameState.LOBBY) {
             plugin.getGameManager().prepareLobbyPlayer(player);
-            TextUtil.sendMessage(player, "<green>¡Bienvenido a <bold>YangUHC</bold>! Usa <gold>/scenarios</gold> y <gold>/team</gold> para prepararte.");
+            plugin.getMessages().send(player, "general.welcome");
         } else {
             // Reconnect logic or spectator
             if (!plugin.getGameManager().isAlive(player)) {
@@ -55,7 +55,7 @@ public class GameListener implements Listener {
         plugin.getScoreboardManager().unregisterPlayer(player);
 
         if (plugin.getGameManager().getState().isGameActive() && plugin.getGameManager().isAlive(player)) {
-            Bukkit.broadcast(TextUtil.parse("<red>" + player.getName() + " se ha desconectado durante la partida."));
+            plugin.getMessages().broadcast("game.player-disconnect", "player", player.getName());
         }
     }
 
@@ -113,14 +113,14 @@ public class GameListener implements Listener {
             if (attacker != null) {
                 if (state == GameState.GRACE_PERIOD) {
                     event.setCancelled(true);
-                    TextUtil.sendMessage(attacker, "<red>¡El PvP está desactivado durante el periodo de gracia!");
+                    plugin.getMessages().send(attacker, "game.pvp-disabled-grace");
                     return;
                 }
 
                 // Friendly Fire check
                 if (!plugin.getTeamManager().isFriendlyFire() && plugin.getTeamManager().areTeammates(attacker, player)) {
                     event.setCancelled(true);
-                    TextUtil.sendMessage(attacker, "<red>¡El fuego amigo está desactivado!");
+                    plugin.getMessages().send(attacker, "game.friendly-fire-disabled");
                 }
             }
         }

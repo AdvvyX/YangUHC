@@ -2,7 +2,6 @@ package net.yanguhc.kit;
 
 import net.yanguhc.YangUHC;
 import net.yanguhc.util.ItemBuilder;
-import net.yanguhc.util.TextUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -144,7 +143,7 @@ public class KitManager {
         }
 
         saveKit(kit);
-        TextUtil.sendMessage(player, "<green>Kit <bold>" + name + "</bold> guardado exitosamente con tu inventario actual (Demora: " + delaySeconds + "s).");
+        plugin.getMessages().send(player, "kits.saved", "kit", name);
     }
 
     public Kit getKit(String name) {
@@ -213,7 +212,7 @@ public class KitManager {
             }
             starterGiven = true;
         } else {
-            Bukkit.broadcast(TextUtil.parse("<yellow><bold>KITS</bold> <gray>» El kit inicial se entregará en <gold>" + delay + " segundos</gold>!"));
+            plugin.getMessages().broadcast("kits.delayed-warning", "seconds", delay);
             BukkitTask starterTask = new BukkitRunnable() {
                 @Override
                 public void run() {
@@ -227,7 +226,7 @@ public class KitManager {
                         }
                     }
                     starterGiven = true;
-                    Bukkit.broadcast(TextUtil.parse("<green><bold>¡KITS ENTREGADOS!</bold> <gray>Todos los jugadores vivos recibieron su equipamiento."));
+                    plugin.getMessages().broadcast("kits.delivered-broadcast");
                 }
             }.runTaskLater(plugin, delay * 20L);
             scheduledKitTasks.add(starterTask);
@@ -250,7 +249,7 @@ public class KitManager {
                                 kit.apply(p);
                             }
                         }
-                        Bukkit.broadcast(TextUtil.parse("<aqua><bold>EVENTO KIT</bold> <gray>» ¡Se ha entregado el kit especial <bold>" + kit.getName() + "</bold> a los jugadores vivos!"));
+                        plugin.getMessages().broadcast("kits.special-event", "kit", kit.getName());
                     }
                 }.runTaskLater(plugin, kitDelay * 20L);
                 scheduledKitTasks.add(delayedTask);

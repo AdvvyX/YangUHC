@@ -2,7 +2,6 @@ package net.yanguhc.game;
 
 import net.yanguhc.YangUHC;
 import net.yanguhc.team.Team;
-import net.yanguhc.util.TextUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
@@ -110,12 +109,12 @@ public class GameManager {
             // Give kits
             plugin.getKitManager().giveStarterKits();
 
-            Bukkit.broadcast(TextUtil.parse("<green><bold>Â¡EL UHC HA COMENZADO!</bold>"));
-            Bukkit.broadcast(TextUtil.parse("<yellow>Periodo de gracia activo durante <gold>" + (gracePeriodDuration / 60) + " minutos</gold>. El PvP estÃ¡ desactivado."));
+            plugin.getMessages().broadcast("game.game-starting");
+            plugin.getMessages().broadcast("game.grace-period-active", "minutes", (gracePeriodDuration / 60));
 
             for (Player p : Bukkit.getOnlinePlayers()) {
                 p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 1f);
-                TextUtil.sendTitle(p, "<green><bold>Â¡UHC INICIADO!</bold>", "<yellow>Recolecta recursos y prepÃ¡rate", 10, 60, 20);
+                plugin.getMessages().sendTitle(p, "titles.start.title", "titles.start.subtitle", 10, 60, 20);
             }
 
             startMainTimer();
@@ -141,7 +140,7 @@ public class GameManager {
                     if (graceRemainingSeconds <= 0) {
                         enablePvP();
                     } else if (graceRemainingSeconds == 60 || graceRemainingSeconds == 30 || graceRemainingSeconds == 10 || graceRemainingSeconds <= 5) {
-                        Bukkit.broadcast(TextUtil.parse("<red><bold>AVISO</bold> <gray>Â» El PvP se activarÃ¡ en <yellow>" + graceRemainingSeconds + " segundos</yellow>!"));
+                        plugin.getMessages().broadcast("game.pvp-warning", "seconds", graceRemainingSeconds);
                         for (Player p : Bukkit.getOnlinePlayers()) {
                             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1f);
                         }
@@ -161,10 +160,10 @@ public class GameManager {
         setState(GameState.INGAME);
         plugin.getWorldManager().getUhcWorld().setPVP(true);
 
-        Bukkit.broadcast(TextUtil.parse("<red><bold>Â¡EL PVP HA SIDO ACTIVADO!</bold> <gray>La protecciÃ³n de gracia ha expirado."));
+        plugin.getMessages().broadcast("game.pvp-enabled");
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.playSound(p.getLocation(), Sound.ENTITY_WITHER_SPAWN, 0.8f, 1f);
-            TextUtil.sendTitle(p, "<red><bold>Â¡PVP ACTIVADO!</bold>", "<yellow>Que gane el mejor", 10, 60, 20);
+            plugin.getMessages().sendTitle(p, "titles.pvp.title", "titles.pvp.subtitle", 10, 60, 20);
         }
     }
 
@@ -180,7 +179,7 @@ public class GameManager {
         } else if (seconds == 4200) { // 70 min
             setState(GameState.DEATHMATCH);
             plugin.getWorldManager().getBorderController().shrinkNextStage(60);
-            Bukkit.broadcast(TextUtil.parse("<dark_red><bold>Â¡DEATHMATCH INICIADO!</bold> <yellow>El borde se reduce al centro!"));
+            plugin.getMessages().broadcast("game.deathmatch-started");
         }
     }
 
@@ -195,7 +194,7 @@ public class GameManager {
         }
 
         player.setGameMode(GameMode.SPECTATOR);
-        TextUtil.sendMessage(player, "<red>Has sido eliminado. Ahora estÃ¡s en modo espectador.");
+        plugin.getMessages().send(player, "game.spectator-eliminated");
         checkWinCondition();
     }
 
@@ -212,8 +211,8 @@ public class GameManager {
         player.setGameMode(GameMode.SURVIVAL);
         player.teleport(plugin.getWorldManager().getUhcWorld().getSpawnLocation());
         player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 10, 255));
-        TextUtil.sendMessage(player, "<green>Â¡Has sido revivido por un administrador!");
-        Bukkit.broadcast(TextUtil.parse("<yellow>" + player.getName() + " ha sido revivido en la partida."));
+        plugin.getMessages().send(player, "game.player-revived");
+        plugin.getMessages().broadcast("game.player-revived-broadcast", "player", player.getName());
     }
 
     public void checkWinCondition() {
@@ -255,14 +254,14 @@ public class GameManager {
             winnerName = player.getName();
         }
 
-        Bukkit.broadcast(TextUtil.parse("<gold><bold>==============================</bold>"));
-        Bukkit.broadcast(TextUtil.parse("<yellow><bold>           Â¡YANG UHC HA FINALIZADO!           </bold>"));
-        Bukkit.broadcast(TextUtil.parse("<white>Ganador: <green><bold>" + winnerName + "</bold>"));
-        Bukkit.broadcast(TextUtil.parse("<gold><bold>==============================</bold>"));
+        plugin.getMessages().broadcast("game.ended-header");
+        plugin.getMessages().broadcast("game.ended-title");
+        plugin.getMessages().broadcast("game.ended-winner", "winner", winnerName);
+        plugin.getMessages().broadcast("game.ended-header");
 
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.playSound(p.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1f, 1f);
-            TextUtil.sendTitle(p, "<gold><bold>Â¡VICTORIA!</bold>", "<yellow>Ganador: " + winnerName, 10, 100, 20);
+            plugin.getMessages().sendTitle(p, "titles.victory.title", "titles.victory.subtitle", 10, 100, 20, "winner", winnerName);
         }
 
         new BukkitRunnable() {
@@ -276,7 +275,7 @@ public class GameManager {
                     return;
                 }
                 if (countdown == 10 || countdown <= 5) {
-                    Bukkit.broadcast(TextUtil.parse("<gray>El servidor se reiniciarÃ¡ en <yellow>" + countdown + " segundos</yellow>..."));
+                    plugin.getMessages().broadcast("game.reboot-countdown", "seconds", countdown);
                 }
                 countdown--;
             }
@@ -321,6 +320,6 @@ public class GameManager {
         setState(GameState.LOBBY);
         if (mainTimerTask != null) mainTimerTask.cancel();
         resetGame();
-        Bukkit.broadcast(TextUtil.parse("<red><bold>UHC</bold> <gray>Â» La partida ha sido detenida por un administrador."));
+        plugin.getMessages().broadcast("game.game-stopped");
     }
 }

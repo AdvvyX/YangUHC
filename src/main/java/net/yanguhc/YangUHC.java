@@ -1,6 +1,7 @@
 package net.yanguhc;
 
 import net.yanguhc.command.*;
+import net.yanguhc.config.Messages;
 import net.yanguhc.game.GameManager;
 import net.yanguhc.kit.KitEditorGUI;
 import net.yanguhc.kit.KitGUI;
@@ -19,6 +20,7 @@ public class YangUHC extends JavaPlugin {
 
     private static YangUHC instance;
 
+    private Messages messages;
     private WorldManager worldManager;
     private TeamManager teamManager;
     private KitManager kitManager;
@@ -38,6 +40,9 @@ public class YangUHC extends JavaPlugin {
 
         // Save default configuration
         saveDefaultConfig();
+
+        // Initialize Messages
+        this.messages = new Messages(this);
 
         // Initialize Managers
         this.worldManager = new WorldManager(this);
@@ -98,6 +103,10 @@ public class YangUHC extends JavaPlugin {
 
     public static YangUHC getInstance() {
         return instance;
+    }
+
+    public Messages getMessages() {
+        return messages;
     }
 
     public WorldManager getWorldManager() {

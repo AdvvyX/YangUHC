@@ -3,7 +3,6 @@ package net.yanguhc.world;
 import net.yanguhc.YangUHC;
 import net.yanguhc.team.Team;
 import net.yanguhc.util.LocationUtil;
-import net.yanguhc.util.TextUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -75,7 +74,7 @@ public class ScatterManager {
             return;
         }
 
-        Bukkit.broadcast(TextUtil.parse("<gold><bold>SCATTER</bold> <gray>» <yellow>Iniciando teleportación segura para <aqua>" + totalGroups + " grupos</aqua>..."));
+        plugin.getMessages().broadcast("scatter.starting", "groups", totalGroups);
 
         new BukkitRunnable() {
             int index = 0;
@@ -85,7 +84,7 @@ public class ScatterManager {
                 if (index >= groups.size()) {
                     cancel();
                     scattering = false;
-                    Bukkit.broadcast(TextUtil.parse("<green><bold>¡SCATTER COMPLETADO!</bold> <gray>Todos los jugadores han sido ubicados."));
+                    plugin.getMessages().broadcast("scatter.completed");
                     if (onComplete != null) {
                         onComplete.run();
                     }
@@ -101,7 +100,7 @@ public class ScatterManager {
                     player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 30, 255, false, false));
                     player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 3, 1, false, false));
                     player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
-                    TextUtil.sendTitle(player, "<gold>¡Teleportado!", "<yellow>Espera a que todos carguen sus chunks", 10, 40, 10);
+                    plugin.getMessages().sendTitle(player, "titles.scatter.title", "titles.scatter.subtitle", 10, 40, 10);
                 }
             }
         }.runTaskTimer(plugin, 5L, 10L); // 2 groups per second to maintain high TPS

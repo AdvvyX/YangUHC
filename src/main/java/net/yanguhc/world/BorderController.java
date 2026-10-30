@@ -1,7 +1,6 @@
 package net.yanguhc.world;
 
 import net.yanguhc.YangUHC;
-import net.yanguhc.util.TextUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -65,9 +64,8 @@ public class BorderController {
             border.setSize(targetRadius * 2.0, seconds);
         }
 
-        String alert = "<gold><bold>BORDE</bold> <gray>» <yellow>El borde se está reduciendo a <red>±" + (int) targetRadius + " bloques</red> en <aqua>" + seconds + "s</aqua>!";
+        plugin.getMessages().broadcast("border.shrinking", "radius", (int) targetRadius, "seconds", seconds);
         for (Player p : Bukkit.getOnlinePlayers()) {
-            TextUtil.sendMessage(p, alert);
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 0.5f);
         }
     }

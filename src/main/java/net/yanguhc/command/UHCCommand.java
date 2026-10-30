@@ -2,7 +2,6 @@ package net.yanguhc.command;
 
 import net.yanguhc.YangUHC;
 import net.yanguhc.kit.Kit;
-import net.yanguhc.scenario.Scenario;
 import net.yanguhc.util.TextUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -27,7 +26,7 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("yanguhc.admin") && !sender.hasPermission("yanguhc.host") && !sender.isOp()) {
-            TextUtil.sendMessage(sender, "<red>No tienes permisos para ejecutar comandos de administración de UHC.");
+            plugin.getMessages().send(sender, "general.no-permission");
             return true;
         }
 
@@ -44,7 +43,6 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
             }
             case "stop" -> {
                 plugin.getGameManager().stopGame();
-                TextUtil.sendMessage(sender, "<red>Partida de UHC detenida.");
             }
             case "scenarios" -> {
                 if (sender instanceof Player p) {
@@ -55,14 +53,13 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
             }
             case "forcepvp" -> {
                 plugin.getGameManager().enablePvP();
-                TextUtil.sendMessage(sender, "<green>PvP forzado manualmente.");
             }
             case "border" -> handleBorder(sender, args);
             case "kit", "kits" -> handleKit(sender, args);
             case "setlobby", "setspawn" -> {
                 if (sender instanceof Player p) {
                     plugin.getWorldManager().setLobbySpawn(p.getLocation());
-                    TextUtil.sendMessage(p, "<green>¡Spawn del lobby establecido exitosamente en tu posición actual!");
+                    plugin.getMessages().send(p, "general.setlobby-success");
                 } else {
                     TextUtil.sendMessage(sender, "<red>Solo jugadores pueden establecer el spawn del lobby.");
                 }
@@ -74,18 +71,18 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
                 }
                 Player target = Bukkit.getPlayer(args[1]);
                 if (target == null) {
-                    TextUtil.sendMessage(sender, "<red>Jugador no encontrado.");
+                    plugin.getMessages().send(sender, "general.player-not-found");
                     return true;
                 }
                 plugin.getGameManager().revivePlayer(target);
-                TextUtil.sendMessage(sender, "<green>Has revivido a " + target.getName() + ".");
             }
             case "reload" -> {
                 plugin.reloadConfig();
+                plugin.getMessages().reload();
                 plugin.getTeamManager().loadConfig();
                 plugin.getScoreboardManager().reload();
                 plugin.getScenarioManager().saveConfig();
-                TextUtil.sendMessage(sender, "<green>Configuración de YangUHC recargada exitosamente.");
+                plugin.getMessages().send(sender, "general.config-reloaded");
             }
             default -> sendHelp(sender);
         }
@@ -108,11 +105,10 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
             } else {
                 plugin.getWorldManager().getBorderController().shrinkNextStage(120);
             }
-            TextUtil.sendMessage(sender, "<green>Comando de reducción de borde ejecutado.");
         } else if (action.equals("set") && args.length >= 3) {
             double radius = Double.parseDouble(args[2]);
             plugin.getWorldManager().getBorderController().resetBorder(radius);
-            TextUtil.sendMessage(sender, "<green>Borde establecido a ±" + (int) radius + " bloques.");
+            plugin.getMessages().broadcast("border.set", "radius", (int) radius);
         }
     }
 
@@ -143,7 +139,7 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
             }
             Kit kit = plugin.getKitManager().getKit(args[2]);
             if (kit == null) {
-                TextUtil.sendMessage(p, "<red>Kit no encontrado.");
+                plugin.getMessages().send(p, "kits.not-found");
                 return;
             }
             plugin.getKitEditorGUI().open(p, kit);
@@ -153,7 +149,7 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
                 return;
             }
             plugin.getKitManager().setStarterKitName(args[2]);
-            TextUtil.sendMessage(sender, "<green>Kit inicial establecido a: " + args[2]);
+            plugin.getMessages().send(sender, "kits.set-starter", "kit", args[2]);
         } else if (sub.equals("list")) {
             TextUtil.sendMessage(sender, "<gold><bold>Kits Disponibles:</bold>");
             for (Kit k : plugin.getKitManager().getAllKits()) {
@@ -174,7 +170,7 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
         TextUtil.sendMessage(sender, "<yellow>/uhc kits <gray>- Abre el menú interactivo de gestión de kits");
         TextUtil.sendMessage(sender, "<yellow>/uhc setlobby <gray>- Establece el spawn del lobby en tu ubicación");
         TextUtil.sendMessage(sender, "<yellow>/uhc revive <jugador> <gray>- Revive a un jugador");
-        TextUtil.sendMessage(sender, "<yellow>/uhc reload <gray>- Recarga las configuraciones");
+        TextUtil.sendMessage(sender, "<yellow>/uhc reload <gray>- Recarga las configuraciones y messages.yml");
     }
 
     @Override

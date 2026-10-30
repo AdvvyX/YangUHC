@@ -1,0 +1,100 @@
+# =========================================================
+#                   YANG UHC - MESSAGES
+#     Soporta MiniMessage (<green>, <gradient>, etc.) y Legacy (&a)
+# =========================================================
+
+prefix: "<gold><bold>YangUHC</bold> <gray>»</gray> "
+
+# Mensajes Generales y de Administración
+general:
+  no-permission: "<red>No tienes permisos para ejecutar este comando."
+  player-not-found: "<red>Jugador no encontrado."
+  config-reloaded: "<green>Configuración de YangUHC recargada exitosamente."
+  welcome: "<green>¡Bienvenido a <bold>YangUHC</bold>! Usa <gold>/scenarios</gold> y <gold>/team</gold> para prepararte."
+  setlobby-success: "<green>¡Spawn del lobby establecido exitosamente en tu posición actual!"
+
+# Estado de la Partida
+game:
+  game-starting: "<green><bold>¡EL UHC HA COMENZADO!</bold>"
+  grace-period-active: "<yellow>Periodo de gracia activo durante <gold>{minutes} minutos</gold>. El PvP está desactivado."
+  pvp-warning: "<red><bold>AVISO</bold> <gray>» El PvP se activará en <yellow>{seconds} segundos</yellow>!"
+  pvp-enabled: "<red><bold>¡EL PVP HA SIDO ACTIVADO!</bold> <gray>La protección de gracia ha expirado."
+  deathmatch-started: "<dark_red><bold>¡DEATHMATCH INICIADO!</bold> <yellow>El borde se reduce al centro!"
+  game-stopped: "<red><bold>UHC</bold> <gray>» La partida ha sido detenida por un administrador."
+  reboot-countdown: "<gray>El servidor se reiniciará en <yellow>{seconds} segundos</yellow>..."
+  spectator-eliminated: "<red>Has sido eliminado. Ahora estás en modo espectador."
+  player-revived: "<green>¡Has sido revivido por un administrador!"
+  player-revived-broadcast: "<yellow>{player} ha sido revivido en la partida."
+  player-disconnect: "<red>{player} se ha desconectado durante la partida."
+  pvp-disabled-grace: "<red>¡El PvP está desactivado durante el periodo de gracia!"
+  friendly-fire-disabled: "<red>¡El fuego amigo está desactivado!"
+  ended-header: "<gold><bold>==============================</bold>"
+  ended-title: "<yellow><bold>           ¡YANG UHC HA FINALIZADO!           </bold>"
+  ended-winner: "<white>Ganador: <green><bold>{winner}</bold>"
+
+# Títulos y Subtítulos en Pantalla
+titles:
+  start:
+    title: "<green><bold>¡UHC INICIADO!</bold>"
+    subtitle: "<yellow>Recolecta recursos y prepárate"
+  pvp:
+    title: "<red><bold>¡PVP ACTIVADO!</bold>"
+    subtitle: "<yellow>Que gane el mejor"
+  victory:
+    title: "<gold><bold>¡VICTORIA!</bold>"
+    subtitle: "<yellow>Ganador: {winner}"
+  scatter:
+    title: "<gold>¡Teleportado!"
+    subtitle: "<yellow>Espera a que todos carguen sus chunks"
+
+# Teletransporte Seguro (Scatter)
+scatter:
+  starting: "<gold><bold>SCATTER</bold> <gray>» <yellow>Iniciando teleportación segura para <aqua>{groups} grupos</aqua>..."
+  completed: "<green><bold>¡SCATTER COMPLETADO!</bold> <gray>Todos los jugadores han sido ubicados."
+
+# Borde del Mundo
+border:
+  shrinking: "<gold><bold>BORDE</bold> <gray>» <yellow>El borde se está reduciendo a <red>±{radius} bloques</red> en <aqua>{seconds}s</aqua>!"
+  set: "<green>Borde establecido a ±{radius} bloques."
+
+# Kits
+kits:
+  received: "<green>¡Has recibido el kit <bold>{kit}</bold>!"
+  delayed-warning: "<yellow><bold>KITS</bold> <gray>» El kit inicial se entregará en <gold>{seconds} segundos</gold>!"
+  delivered-broadcast: "<green><bold>¡KITS ENTREGADOS!</bold> <gray>Todos los jugadores vivos recibieron su equipamiento."
+  special-event: "<aqua><bold>EVENTO KIT</bold> <gray>» ¡Se ha entregado el kit especial <bold>{kit}</bold> a los jugadores vivos!"
+  saved: "<green>¡Kit <bold>{kit}</bold> guardado exitosamente!"
+  deleted: "<red>El kit <bold>{kit}</bold> ha sido eliminado."
+  set-starter: "<green>El kit <bold>{kit}</bold> es ahora el kit inicial de la partida."
+  not-found: "<red>Kit no encontrado."
+
+# Escenarios
+scenarios:
+  toggled: "<gold><bold>ESCENARIOS</bold> <gray>» El escenario <yellow>{scenario}</yellow> ha sido {status}."
+  status-enabled: "<green>activado</green>"
+  status-disabled: "<red>desactivado</red>"
+  no-permission: "<red>Solo los administradores u operadores pueden alternar escenarios."
+  diamondless-warning: "<red>Diamondless está activo: ¡Los diamantes solo se consiguen con kills!"
+  goldless-warning: "<red>Goldless está activo: ¡El oro solo se consigue con kills!"
+  bowless-warning: "<red>Bowless está activo: ¡No puedes usar arcos ni ballestas!"
+  horseless-warning: "<red>Horseless está activo: ¡No puedes montar ni domesticar caballos!"
+  noclean-protect: "<green>NoClean activo: Eres invulnerable durante <gold>20 segundos</gold> (se cancela si atacas a otro jugador)."
+  noclean-cancelled: "<yellow>Has atacado a un jugador: tu protección NoClean ha sido desactivada."
+
+# Equipos (Teams)
+teams:
+  created: "<green>Has creado el equipo <bold>{team}</bold> exitosamente."
+  already-in: "<red>¡Ya perteneces a un equipo!"
+  must-leave-first: "<red>Ya estás en un equipo. Sal primero usando /team leave."
+  joined: "<green>{player} se ha unido al equipo."
+  left: "<yellow>Has abandonado el equipo {team}."
+  left-broadcast: "<red>{player} ha salido del equipo."
+  full: "<red>El equipo ya está lleno ({max} miembros máx)."
+  invite-sent: "<green>Invitación enviada a {player}."
+  invite-received: "<gold><bold>UHC TEAMS</bold> <gray>» <yellow>{player} te ha invitado a su equipo. Escribe <green><click:run_command:'/team accept'>/team accept</click></green> para unirte."
+  no-invite: "<red>No tienes ninguna invitación pendiente."
+  invite-expired: "<red>La invitación ya no es válida."
+  chat-enabled: "<green>Chat de equipo <bold>activado</bold>. Todos tus mensajes irán a tu equipo."
+  chat-disabled: "<yellow>Chat de equipo <bold>desactivado</bold>. Ahora hablas por el chat global."
+  chat-format: "<dark_gray>[<aqua>TeamChat</aqua>]</dark_gray> <yellow>{player}<gray>: <white>{message}"
+  not-in-team-chat: "<red>No estás en un equipo para usar el chat de equipo."

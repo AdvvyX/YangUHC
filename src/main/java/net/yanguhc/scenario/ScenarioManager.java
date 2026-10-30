@@ -2,8 +2,6 @@ package net.yanguhc.scenario;
 
 import net.yanguhc.YangUHC;
 import net.yanguhc.scenario.impl.*;
-import net.yanguhc.util.TextUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -115,8 +113,8 @@ public class ScenarioManager {
         scenario.setEnabled(newState);
         saveConfig();
 
-        String status = newState ? "<green>activado</green>" : "<red>desactivado</red>";
-        Bukkit.broadcast(TextUtil.parse("<gold><bold>ESCENARIOS</bold> <gray>» El escenario <yellow>" + scenario.getName() + "</yellow> ha sido " + status + "."));
+        String status = newState ? plugin.getMessages().getRaw("scenarios.status-enabled") : plugin.getMessages().getRaw("scenarios.status-disabled");
+        plugin.getMessages().broadcast("scenarios.toggled", "scenario", scenario.getName(), "status", status);
         return newState;
     }
 }

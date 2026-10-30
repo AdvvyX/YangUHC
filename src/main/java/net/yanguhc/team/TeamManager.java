@@ -1,6 +1,5 @@
 package net.yanguhc.team;
 
-import net.kyori.adventure.text.Component;
 import net.yanguhc.YangUHC;
 import net.yanguhc.util.TextUtil;
 import org.bukkit.entity.Player;
@@ -78,7 +77,7 @@ public class TeamManager {
 
     public Team createTeam(Player leader) {
         if (getTeam(leader) != null) {
-            TextUtil.sendMessage(leader, "<red>¡Ya perteneces a un equipo!");
+            plugin.getMessages().send(leader, "teams.already-in");
             return null;
         }
 
@@ -92,7 +91,7 @@ public class TeamManager {
         teams.put(id, team);
         playerTeamMap.put(leader.getUniqueId(), team);
 
-        TextUtil.sendMessage(leader, "<green>Has creado el equipo <bold>" + name + "</bold> exitosamente.");
+        plugin.getMessages().send(leader, "teams.created", "team", name);
         return team;
     }
 
@@ -100,12 +99,12 @@ public class TeamManager {
         if (team == null || player == null) return false;
 
         if (getTeam(player) != null) {
-            TextUtil.sendMessage(player, "<red>Ya estás en un equipo. Sal primero usando /team leave.");
+            plugin.getMessages().send(player, "teams.must-leave-first");
             return false;
         }
 
         if (team.getMembers().size() >= maxTeamSize) {
-            TextUtil.sendMessage(player, "<red>El equipo ya está lleno (" + maxTeamSize + " miembros máx).");
+            plugin.getMessages().send(player, "teams.full", "max", maxTeamSize);
             return false;
         }
 
@@ -113,7 +112,8 @@ public class TeamManager {
         playerTeamMap.put(player.getUniqueId(), team);
         pendingInvites.remove(player.getUniqueId());
 
-        team.broadcast("<green>" + player.getName() + " se ha unido al equipo.");
+        String msg = plugin.getMessages().getFormatted("teams.joined", "player", player.getName());
+        team.broadcast(msg);
         return true;
     }
 
@@ -128,8 +128,9 @@ public class TeamManager {
         playerTeamMap.remove(player.getUniqueId());
         teamChatEnabled.remove(player.getUniqueId());
 
-        TextUtil.sendMessage(player, "<yellow>Has abandonado el equipo " + team.getName() + ".");
-        team.broadcast("<red>" + player.getName() + " ha salido del equipo.");
+        plugin.getMessages().send(player, "teams.left", "team", team.getName());
+        String msg = plugin.getMessages().getFormatted("teams.left-broadcast", "player", player.getName());
+        team.broadcast(msg);
 
         if (team.getMembers().isEmpty()) {
             teams.remove(team.getId());
@@ -149,7 +150,7 @@ public class TeamManager {
         }
 
         if (team.getMembers().size() >= maxTeamSize) {
-            TextUtil.sendMessage(inviter, "<red>El equipo ya está lleno (" + maxTeamSize + " miembros máx).");
+            plugin.getMessages().send(inviter, "teams.full", "max", maxTeamSize);
             return;
         }
 
@@ -159,20 +160,20 @@ public class TeamManager {
         }
 
         pendingInvites.put(target.getUniqueId(), team.getId());
-        TextUtil.sendMessage(inviter, "<green>Invitación enviada a " + target.getName() + ".");
-        TextUtil.sendMessage(target, "<gold><bold>UHC TEAMS</bold> <gray>» <yellow>" + inviter.getName() + " te ha invitado a su equipo. Escribe <green><click:run_command:'/team accept'>/team accept</click></green> para unirte.");
+        plugin.getMessages().send(inviter, "teams.invite-sent", "player", target.getName());
+        plugin.getMessages().send(target, "teams.invite-received", "player", inviter.getName());
     }
 
     public boolean acceptInvite(Player player) {
         String teamId = pendingInvites.get(player.getUniqueId());
         if (teamId == null) {
-            TextUtil.sendMessage(player, "<red>No tienes ninguna invitación pendiente.");
+            plugin.getMessages().send(player, "teams.no-invite");
             return false;
         }
 
         Team team = teams.get(teamId);
         if (team == null) {
-            TextUtil.sendMessage(player, "<red>La invitación ya no es válida.");
+            plugin.getMessages().send(player, "teams.invite-expired");
             pendingInvites.remove(player.getUniqueId());
             return false;
         }
@@ -190,9 +191,11 @@ public class TeamManager {
     public boolean toggleTeamChat(Player player) {
         if (teamChatEnabled.contains(player.getUniqueId())) {
             teamChatEnabled.remove(player.getUniqueId());
+            plugin.getMessages().send(player, "teams.chat-disabled");
             return false;
         } else {
             teamChatEnabled.add(player.getUniqueId());
+            plugin.getMessages().send(player, "teams.chat-enabled");
             return true;
         }
     }
@@ -204,11 +207,11 @@ public class TeamManager {
     public void sendTeamChatMessage(Player sender, String message) {
         Team team = getTeam(sender);
         if (team == null) {
-            TextUtil.sendMessage(sender, "<red>No estás en un equipo para usar el chat de equipo.");
+            plugin.getMessages().send(sender, "teams.not-in-team-chat");
             return;
         }
 
-        String formatted = "<dark_gray>[<aqua>TeamChat</aqua>]</dark_gray> <yellow>" + sender.getName() + "<gray>: <white>" + message;
+        String formatted = plugin.getMessages().getFormatted("teams.chat-format", "player", sender.getName(), "message", message);
         team.broadcast(formatted);
     }
 

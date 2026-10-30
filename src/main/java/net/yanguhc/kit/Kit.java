@@ -1,6 +1,6 @@
 package net.yanguhc.kit;
 
-import net.yanguhc.util.TextUtil;
+import net.yanguhc.YangUHC;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -127,6 +127,6 @@ public class Kit {
         }
 
         player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_IRON, 1f, 1f);
-        TextUtil.sendMessage(player, "<green>¡Has recibido el kit <bold>" + name + "</bold>!");
+        YangUHC.getInstance().getMessages().send(player, "kits.received", "kit", name);
     }
 }
