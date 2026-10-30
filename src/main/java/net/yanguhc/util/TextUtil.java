@@ -3,17 +3,20 @@ package net.yanguhc.util;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.title.Title;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
 public final class TextUtil {
 
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
-    private static final LegacyComponentSerializer AMPERSAND_SERIALIZER = LegacyComponentSerializer.legacyAmpersand();
     private static final LegacyComponentSerializer SECTION_SERIALIZER = LegacyComponentSerializer.legacySection();
+    private static final LegacyComponentSerializer AMPERSAND_SERIALIZER = LegacyComponentSerializer.legacyAmpersand();
 
     private TextUtil() {
     }
@@ -22,21 +25,30 @@ public final class TextUtil {
         if (input == null || input.isEmpty()) {
             return Component.empty();
         }
-        // If string contains MiniMessage tags like <red>, <gradient>, etc.
+
+        // If string contains MiniMessage tags (<tag>...</tag>)
         if (input.contains("<") && input.contains(">")) {
-            // Translate legacy & first if mixed
-            String converted = AMPERSAND_SERIALIZER.serialize(AMPERSAND_SERIALIZER.deserialize(input));
             try {
+                // If it also contains legacy & codes, convert & to section first
+                String translated = ChatColor.translateAlternateColorCodes('&', input);
+                // If it has MiniMessage tags, deserialize directly
                 return MINI_MESSAGE.deserialize(input);
             } catch (Exception ignored) {
-                // Fallback to legacy
             }
         }
-        // Fallback or legacy format
-        return AMPERSAND_SERIALIZER.deserialize(input.replace('§', '&'));
+
+        // Standard legacy format (&a, &l, §c, etc.)
+        String formatted = ChatColor.translateAlternateColorCodes('&', input);
+        return SECTION_SERIALIZER.deserialize(formatted);
     }
 
     public static String toLegacy(Component component) {
+        if (component == null) return "";
+        return SECTION_SERIALIZER.serialize(component);
+    }
+
+    public static String toAmpersand(Component component) {
+        if (component == null) return "";
         return AMPERSAND_SERIALIZER.serialize(component);
     }
 
@@ -56,15 +68,18 @@ public final class TextUtil {
         }
     }
 
-    public static void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+    public static void sendTitle(Player player, String title, String subtitle, int fadeInTicks, int stayTicks, int fadeOutTicks) {
         if (player == null) return;
-        player.sendTitle(
-                toLegacy(parse(title)),
-                toLegacy(parse(subtitle)),
-                fadeIn,
-                stay,
-                fadeOut
+        Component titleComp = parse(title);
+        Component subComp = parse(subtitle);
+
+        Title.Times times = Title.Times.times(
+                Duration.ofMillis(fadeInTicks * 50L),
+                Duration.ofMillis(stayTicks * 50L),
+                Duration.ofMillis(fadeOutTicks * 50L)
         );
+
+        player.showTitle(Title.title(titleComp, subComp, times));
     }
 
     public static void sendActionBar(Player player, String message) {

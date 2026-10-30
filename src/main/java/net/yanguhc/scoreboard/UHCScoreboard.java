@@ -15,7 +15,6 @@ public class UHCScoreboard {
     private final Player player;
     private final Scoreboard scoreboard;
     private final Objective objective;
-    private final List<String> currentLines = new ArrayList<>();
 
     public UHCScoreboard(Player player) {
         this.player = player;
@@ -23,6 +22,12 @@ public class UHCScoreboard {
         this.scoreboard = manager.getNewScoreboard();
         this.objective = scoreboard.registerNewObjective("yanguhc", Criteria.DUMMY, Component.empty());
         this.objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+
+        // Hide red numbers on modern Paper 1.21+ if supported
+        try {
+            this.objective.numberFormat(io.papermc.paper.scoreboard.numbers.NumberFormat.blank());
+        } catch (Throwable ignored) {
+        }
 
         // Pre-create 15 team lines
         for (int i = 0; i < 15; i++) {
