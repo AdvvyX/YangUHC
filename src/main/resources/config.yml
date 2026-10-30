@@ -1,0 +1,45 @@
+# =========================================================
+#                   YANG UHC CONFIGURATION
+#             Compatible con Paper / Purpur 1.21+
+# =========================================================
+
+# Configuración del Mundo y Generador
+world:
+  # Nombre del mundo donde se jugará el UHC
+  name: "uhc_world"
+  # Nombre del mundo donde estará el lobby / sala de espera
+  lobby-name: "world"
+  # Semilla personalizada (0 para aleatoria)
+  seed: 0
+
+# Configuración del Borde del Mundo
+border:
+  # Radio inicial del borde (1000 = ±1000 bloques, tamaño total 2000x2000)
+  initial-radius: 1000.0
+  # Fases de reducción de radio de borde
+  stages:
+    - 1000.0
+    - 750.0
+    - 500.0
+    - 250.0
+    - 100.0
+    - 50.0
+    - 25.0
+
+# Reglas de la Partida
+game:
+  # Duración del periodo de gracia sin PvP (en segundos, 1200 = 20 minutos)
+  grace-period-seconds: 1200
+  # Permitir regeneración natural (siempre false en UHC)
+  natural-regeneration: false
+
+# Configuración de Equipos (Teams)
+teams:
+  # Tamaño máximo de miembros por equipo (1 = FFA/Solo, 2 = To2, 3 = To3, etc.)
+  max-size: 2
+  # Fuego amigo entre compañeros de equipo (false = daño cancelado)
+  friendly-fire: false
+
+# Configuración del Servidor
+server:
+  ip: "play.yanguhc.net"

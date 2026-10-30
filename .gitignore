@@ -1,0 +1,13 @@
+.gradle/
+build/
+bin/
+out/
+.idea/
+*.iml
+.vscode/
+.antigravity/
+.env
+.env*
+*.key
+*.secret
+

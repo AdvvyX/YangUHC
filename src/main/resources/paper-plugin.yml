@@ -1,0 +1,6 @@
+name: YangUHC
+version: 1.0.0
+main: net.yanguhc.YangUHC
+api-version: '1.21'
+author: Advvy
+description: Sistema avanzado y completo de Ultra Hardcore (UHC) para Minecraft 1.21+

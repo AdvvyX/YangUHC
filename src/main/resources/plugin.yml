@@ -1,0 +1,32 @@
+name: YangUHC
+version: 1.0.0
+main: net.yanguhc.YangUHC
+api-version: '1.21'
+author: Advvy
+description: Sistema avanzado y completo de Ultra Hardcore (UHC) para Minecraft 1.21+
+
+commands:
+  uhc:
+    description: Comando principal de administración de UHC
+    permission: yanguhc.admin
+    usage: /<command> [start|stop|scenarios|forcepvp|border|kit|revive|reload]
+  team:
+    description: Gestión de equipos de UHC
+    usage: /<command> [create|invite|accept|leave|list]
+    aliases: [teams]
+  tc:
+    description: Chat exclusivo de equipo
+    usage: /<command> [mensaje]
+    aliases: [teamchat]
+  scenarios:
+    description: Ver y consultar los escenarios activos
+    usage: /<command>
+    aliases: [escenarios, sc]
+
+permissions:
+  yanguhc.admin:
+    description: Permiso total para gestionar la partida de UHC
+    default: op
+  yanguhc.host:
+    description: Permiso para hostear partidas y alternar escenarios
+    default: op
