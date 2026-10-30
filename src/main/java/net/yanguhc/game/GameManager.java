@@ -110,12 +110,12 @@ public class GameManager {
             // Give kits
             plugin.getKitManager().giveStarterKits();
 
-            Bukkit.broadcast(TextUtil.parse("<green><bold>¡EL UHC HA COMENZADO!</bold>"));
-            Bukkit.broadcast(TextUtil.parse("<yellow>Periodo de gracia activo durante <gold>" + (gracePeriodDuration / 60) + " minutos</gold>. El PvP está desactivado."));
+            Bukkit.broadcast(TextUtil.parse("<green><bold>Â¡EL UHC HA COMENZADO!</bold>"));
+            Bukkit.broadcast(TextUtil.parse("<yellow>Periodo de gracia activo durante <gold>" + (gracePeriodDuration / 60) + " minutos</gold>. El PvP estÃ¡ desactivado."));
 
             for (Player p : Bukkit.getOnlinePlayers()) {
                 p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 1f);
-                TextUtil.sendTitle(p, "<green><bold>¡UHC INICIADO!</bold>", "<yellow>Recolecta recursos y prepárate", 10, 60, 20);
+                TextUtil.sendTitle(p, "<green><bold>Â¡UHC INICIADO!</bold>", "<yellow>Recolecta recursos y prepÃ¡rate", 10, 60, 20);
             }
 
             startMainTimer();
@@ -141,7 +141,7 @@ public class GameManager {
                     if (graceRemainingSeconds <= 0) {
                         enablePvP();
                     } else if (graceRemainingSeconds == 60 || graceRemainingSeconds == 30 || graceRemainingSeconds == 10 || graceRemainingSeconds <= 5) {
-                        Bukkit.broadcast(TextUtil.parse("<red><bold>AVISO</bold> <gray>» El PvP se activará en <yellow>" + graceRemainingSeconds + " segundos</yellow>!"));
+                        Bukkit.broadcast(TextUtil.parse("<red><bold>AVISO</bold> <gray>Â» El PvP se activarÃ¡ en <yellow>" + graceRemainingSeconds + " segundos</yellow>!"));
                         for (Player p : Bukkit.getOnlinePlayers()) {
                             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1f);
                         }
@@ -161,10 +161,10 @@ public class GameManager {
         setState(GameState.INGAME);
         plugin.getWorldManager().getUhcWorld().setPVP(true);
 
-        Bukkit.broadcast(TextUtil.parse("<red><bold>¡EL PVP HA SIDO ACTIVADO!</bold> <gray>La protección de gracia ha expirado."));
+        Bukkit.broadcast(TextUtil.parse("<red><bold>Â¡EL PVP HA SIDO ACTIVADO!</bold> <gray>La protecciÃ³n de gracia ha expirado."));
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.playSound(p.getLocation(), Sound.ENTITY_WITHER_SPAWN, 0.8f, 1f);
-            TextUtil.sendTitle(p, "<red><bold>¡PVP ACTIVADO!</bold>", "<yellow>Que gane el mejor", 10, 60, 20);
+            TextUtil.sendTitle(p, "<red><bold>Â¡PVP ACTIVADO!</bold>", "<yellow>Que gane el mejor", 10, 60, 20);
         }
     }
 
@@ -180,7 +180,7 @@ public class GameManager {
         } else if (seconds == 4200) { // 70 min
             setState(GameState.DEATHMATCH);
             plugin.getWorldManager().getBorderController().shrinkNextStage(60);
-            Bukkit.broadcast(TextUtil.parse("<dark_red><bold>¡DEATHMATCH INICIADO!</bold> <yellow>El borde se reduce al centro!"));
+            Bukkit.broadcast(TextUtil.parse("<dark_red><bold>Â¡DEATHMATCH INICIADO!</bold> <yellow>El borde se reduce al centro!"));
         }
     }
 
@@ -195,7 +195,7 @@ public class GameManager {
         }
 
         player.setGameMode(GameMode.SPECTATOR);
-        TextUtil.sendMessage(player, "<red>Has sido eliminado. Ahora estás en modo espectador.");
+        TextUtil.sendMessage(player, "<red>Has sido eliminado. Ahora estÃ¡s en modo espectador.");
         checkWinCondition();
     }
 
@@ -212,7 +212,7 @@ public class GameManager {
         player.setGameMode(GameMode.SURVIVAL);
         player.teleport(plugin.getWorldManager().getUhcWorld().getSpawnLocation());
         player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 10, 255));
-        TextUtil.sendMessage(player, "<green>¡Has sido revivido por un administrador!");
+        TextUtil.sendMessage(player, "<green>Â¡Has sido revivido por un administrador!");
         Bukkit.broadcast(TextUtil.parse("<yellow>" + player.getName() + " ha sido revivido en la partida."));
     }
 
@@ -246,6 +246,7 @@ public class GameManager {
     public void endGame(Object winnerObj) {
         setState(GameState.ENDED);
         if (mainTimerTask != null) mainTimerTask.cancel();
+        plugin.getKitManager().reset();
 
         String winnerName = "Nadie";
         if (winnerObj instanceof Team team) {
@@ -255,13 +256,13 @@ public class GameManager {
         }
 
         Bukkit.broadcast(TextUtil.parse("<gold><bold>==============================</bold>"));
-        Bukkit.broadcast(TextUtil.parse("<yellow><bold>           ¡YANG UHC HA FINALIZADO!           </bold>"));
+        Bukkit.broadcast(TextUtil.parse("<yellow><bold>           Â¡YANG UHC HA FINALIZADO!           </bold>"));
         Bukkit.broadcast(TextUtil.parse("<white>Ganador: <green><bold>" + winnerName + "</bold>"));
         Bukkit.broadcast(TextUtil.parse("<gold><bold>==============================</bold>"));
 
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.playSound(p.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1f, 1f);
-            TextUtil.sendTitle(p, "<gold><bold>¡VICTORIA!</bold>", "<yellow>Ganador: " + winnerName, 10, 100, 20);
+            TextUtil.sendTitle(p, "<gold><bold>Â¡VICTORIA!</bold>", "<yellow>Ganador: " + winnerName, 10, 100, 20);
         }
 
         new BukkitRunnable() {
@@ -275,7 +276,7 @@ public class GameManager {
                     return;
                 }
                 if (countdown == 10 || countdown <= 5) {
-                    Bukkit.broadcast(TextUtil.parse("<gray>El servidor se reiniciará en <yellow>" + countdown + " segundos</yellow>..."));
+                    Bukkit.broadcast(TextUtil.parse("<gray>El servidor se reiniciarÃ¡ en <yellow>" + countdown + " segundos</yellow>..."));
                 }
                 countdown--;
             }
@@ -320,6 +321,6 @@ public class GameManager {
         setState(GameState.LOBBY);
         if (mainTimerTask != null) mainTimerTask.cancel();
         resetGame();
-        Bukkit.broadcast(TextUtil.parse("<red><bold>UHC</bold> <gray>» La partida ha sido detenida por un administrador."));
+        Bukkit.broadcast(TextUtil.parse("<red><bold>UHC</bold> <gray>Â» La partida ha sido detenida por un administrador."));
     }
 }

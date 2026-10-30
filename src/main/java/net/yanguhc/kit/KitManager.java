@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +26,7 @@ public class KitManager {
     private File file;
     private FileConfiguration config;
     private boolean starterGiven = false;
+    private final List<BukkitTask> scheduledKitTasks = new ArrayList<>();
 
     public KitManager(YangUHC plugin) {
         this.plugin = plugin;
@@ -188,28 +190,47 @@ public class KitManager {
         return Collections.unmodifiableCollection(kits.values());
     }
 
+    public void cancelPendingTasks() {
+        for (BukkitTask task : scheduledKitTasks) {
+            if (task != null && !task.isCancelled()) {
+                task.cancel();
+            }
+        }
+        scheduledKitTasks.clear();
+    }
+
     public void giveStarterKits() {
+        cancelPendingTasks();
         Kit starter = getStarterKit();
         if (starter == null) return;
 
         int delay = starter.getDelaySeconds();
         if (delay <= 0) {
             for (Player p : Bukkit.getOnlinePlayers()) {
-                starter.apply(p);
+                if (plugin.getGameManager().isAlive(p)) {
+                    starter.apply(p);
+                }
             }
             starterGiven = true;
         } else {
             Bukkit.broadcast(TextUtil.parse("<yellow><bold>KITS</bold> <gray>» El kit inicial se entregará en <gold>" + delay + " segundos</gold>!"));
-            new BukkitRunnable() {
+            BukkitTask starterTask = new BukkitRunnable() {
                 @Override
                 public void run() {
+                    if (!plugin.getGameManager().getState().isGameActive()) {
+                        cancel();
+                        return;
+                    }
                     for (Player p : Bukkit.getOnlinePlayers()) {
-                        starter.apply(p);
+                        if (plugin.getGameManager().isAlive(p)) {
+                            starter.apply(p);
+                        }
                     }
                     starterGiven = true;
-                    Bukkit.broadcast(TextUtil.parse("<green><bold>¡KITS ENTREGADOS!</bold> <gray>Todos los jugadores recibieron su equipamiento."));
+                    Bukkit.broadcast(TextUtil.parse("<green><bold>¡KITS ENTREGADOS!</bold> <gray>Todos los jugadores vivos recibieron su equipamiento."));
                 }
             }.runTaskLater(plugin, delay * 20L);
+            scheduledKitTasks.add(starterTask);
         }
 
         // Schedule other delayed kits if any
@@ -217,20 +238,28 @@ public class KitManager {
             if (kit == starter) continue;
             int kitDelay = kit.getDelaySeconds();
             if (kitDelay > 0) {
-                new BukkitRunnable() {
+                BukkitTask delayedTask = new BukkitRunnable() {
                     @Override
                     public void run() {
-                        for (Player p : Bukkit.getOnlinePlayers()) {
-                            kit.apply(p);
+                        if (!plugin.getGameManager().getState().isGameActive()) {
+                            cancel();
+                            return;
                         }
-                        Bukkit.broadcast(TextUtil.parse("<aqua><bold>EVENTO KIT</bold> <gray>» ¡Se ha entregado el kit especial <bold>" + kit.getName() + "</bold>!"));
+                        for (Player p : Bukkit.getOnlinePlayers()) {
+                            if (plugin.getGameManager().isAlive(p)) {
+                                kit.apply(p);
+                            }
+                        }
+                        Bukkit.broadcast(TextUtil.parse("<aqua><bold>EVENTO KIT</bold> <gray>» ¡Se ha entregado el kit especial <bold>" + kit.getName() + "</bold> a los jugadores vivos!"));
                     }
                 }.runTaskLater(plugin, kitDelay * 20L);
+                scheduledKitTasks.add(delayedTask);
             }
         }
     }
 
     public void reset() {
         starterGiven = false;
+        cancelPendingTasks();
     }
 }
