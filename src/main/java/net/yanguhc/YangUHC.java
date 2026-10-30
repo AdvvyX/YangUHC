@@ -2,8 +2,10 @@ package net.yanguhc;
 
 import net.yanguhc.command.*;
 import net.yanguhc.game.GameManager;
+import net.yanguhc.kit.KitEditorGUI;
 import net.yanguhc.kit.KitGUI;
 import net.yanguhc.kit.KitManager;
+import net.yanguhc.kit.KitManagerGUI;
 import net.yanguhc.listener.GameListener;
 import net.yanguhc.scenario.ScenarioGUI;
 import net.yanguhc.scenario.ScenarioManager;
@@ -27,6 +29,8 @@ public class YangUHC extends JavaPlugin {
     private ScenarioGUI scenarioGUI;
     private TeamGUI teamGUI;
     private KitGUI kitGUI;
+    private KitManagerGUI kitManagerGUI;
+    private KitEditorGUI kitEditorGUI;
 
     @Override
     public void onEnable() {
@@ -49,6 +53,8 @@ public class YangUHC extends JavaPlugin {
         this.scenarioGUI = new ScenarioGUI(this);
         this.teamGUI = new TeamGUI(this);
         this.kitGUI = new KitGUI(this);
+        this.kitManagerGUI = new KitManagerGUI(this);
+        this.kitEditorGUI = new KitEditorGUI(this);
 
         // Register Listeners
         getServer().getPluginManager().registerEvents(new GameListener(this), this);
@@ -128,5 +134,13 @@ public class YangUHC extends JavaPlugin {
 
     public KitGUI getKitGUI() {
         return kitGUI;
+    }
+
+    public KitManagerGUI getKitManagerGUI() {
+        return kitManagerGUI;
+    }
+
+    public KitEditorGUI getKitEditorGUI() {
+        return kitEditorGUI;
     }
 }

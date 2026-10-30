@@ -26,7 +26,7 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!sender.hasPermission("yanguhc.admin") && !sender.hasPermission("yanguhc.host")) {
+        if (!sender.hasPermission("yanguhc.admin") && !sender.hasPermission("yanguhc.host") && !sender.isOp()) {
             TextUtil.sendMessage(sender, "<red>No tienes permisos para ejecutar comandos de administración de UHC.");
             return true;
         }
@@ -58,7 +58,15 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
                 TextUtil.sendMessage(sender, "<green>PvP forzado manualmente.");
             }
             case "border" -> handleBorder(sender, args);
-            case "kit" -> handleKit(sender, args);
+            case "kit", "kits" -> handleKit(sender, args);
+            case "setlobby", "setspawn" -> {
+                if (sender instanceof Player p) {
+                    plugin.getWorldManager().setLobbySpawn(p.getLocation());
+                    TextUtil.sendMessage(p, "<green>¡Spawn del lobby establecido exitosamente en tu posición actual!");
+                } else {
+                    TextUtil.sendMessage(sender, "<red>Solo jugadores pueden establecer el spawn del lobby.");
+                }
+            }
             case "revive" -> {
                 if (args.length < 2) {
                     TextUtil.sendMessage(sender, "<red>Uso: /uhc revive <jugador>");
@@ -71,14 +79,6 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
                 }
                 plugin.getGameManager().revivePlayer(target);
                 TextUtil.sendMessage(sender, "<green>Has revivido a " + target.getName() + ".");
-            }
-            case "setlobby", "setspawn" -> {
-                if (sender instanceof Player p) {
-                    plugin.getWorldManager().setLobbySpawn(p.getLocation());
-                    TextUtil.sendMessage(p, "<green>¡Spawn del lobby establecido exitosamente en tu posición actual!");
-                } else {
-                    TextUtil.sendMessage(sender, "<red>Solo jugadores pueden establecer el spawn del lobby.");
-                }
             }
             case "reload" -> {
                 plugin.reloadConfig();
@@ -117,8 +117,13 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
     }
 
     private void handleKit(CommandSender sender, String[] args) {
+        // If /uhc kit or /uhc kits without args: open the interactive GUI
         if (args.length < 2) {
-            TextUtil.sendMessage(sender, "<yellow>Uso: /uhc kit <create|preview|give|setstarter|list> [argumentos]");
+            if (sender instanceof Player p) {
+                plugin.getKitManagerGUI().open(p);
+                return;
+            }
+            TextUtil.sendMessage(sender, "<yellow>Uso: /uhc kit <create|edit|preview|setstarter|list> [argumentos]");
             return;
         }
 
@@ -131,9 +136,9 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
             String name = args[2];
             int delay = args.length >= 4 ? Integer.parseInt(args[3]) : 0;
             plugin.getKitManager().createKitFromPlayer(name, p, delay);
-        } else if (sub.equals("preview") && sender instanceof Player p) {
+        } else if ((sub.equals("edit") || sub.equals("preview")) && sender instanceof Player p) {
             if (args.length < 3) {
-                TextUtil.sendMessage(p, "<red>Uso: /uhc kit preview <nombre>");
+                TextUtil.sendMessage(p, "<red>Uso: /uhc kit edit <nombre>");
                 return;
             }
             Kit kit = plugin.getKitManager().getKit(args[2]);
@@ -141,7 +146,7 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
                 TextUtil.sendMessage(p, "<red>Kit no encontrado.");
                 return;
             }
-            plugin.getKitGUI().openPreview(p, kit);
+            plugin.getKitEditorGUI().open(p, kit);
         } else if (sub.equals("setstarter")) {
             if (args.length < 3) {
                 TextUtil.sendMessage(sender, "<red>Uso: /uhc kit setstarter <nombre>");
@@ -154,6 +159,8 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
             for (Kit k : plugin.getKitManager().getAllKits()) {
                 TextUtil.sendMessage(sender, "<yellow>- " + k.getName() + " <gray>(Demora: " + k.getDelaySeconds() + "s)");
             }
+        } else if (sender instanceof Player p) {
+            plugin.getKitManagerGUI().open(p);
         }
     }
 
@@ -164,7 +171,7 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
         TextUtil.sendMessage(sender, "<yellow>/uhc scenarios <gray>- Abre el gestor de escenarios");
         TextUtil.sendMessage(sender, "<yellow>/uhc forcepvp <gray>- Activa el PvP de inmediato");
         TextUtil.sendMessage(sender, "<yellow>/uhc border <shrink|set> <gray>- Controla el borde del mundo");
-        TextUtil.sendMessage(sender, "<yellow>/uhc kit <create|preview|setstarter|list> <gray>- Gestor de kits");
+        TextUtil.sendMessage(sender, "<yellow>/uhc kits <gray>- Abre el menú interactivo de gestión de kits");
         TextUtil.sendMessage(sender, "<yellow>/uhc setlobby <gray>- Establece el spawn del lobby en tu ubicación");
         TextUtil.sendMessage(sender, "<yellow>/uhc revive <jugador> <gray>- Revive a un jugador");
         TextUtil.sendMessage(sender, "<yellow>/uhc reload <gray>- Recarga las configuraciones");
@@ -172,18 +179,18 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (!sender.hasPermission("yanguhc.admin")) return Collections.emptyList();
+        if (!sender.hasPermission("yanguhc.admin") && !sender.isOp()) return Collections.emptyList();
 
         if (args.length == 1) {
-            return filter(Arrays.asList("start", "stop", "scenarios", "forcepvp", "border", "kit", "setlobby", "setspawn", "revive", "reload"), args[0]);
+            return filter(Arrays.asList("start", "stop", "scenarios", "forcepvp", "border", "kit", "kits", "setlobby", "setspawn", "revive", "reload"), args[0]);
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("border")) {
             return filter(Arrays.asList("set", "shrink"), args[1]);
         }
 
-        if (args.length == 2 && args[0].equalsIgnoreCase("kit")) {
-            return filter(Arrays.asList("create", "preview", "give", "setstarter", "list"), args[1]);
+        if (args.length == 2 && (args[0].equalsIgnoreCase("kit") || args[0].equalsIgnoreCase("kits"))) {
+            return filter(Arrays.asList("create", "edit", "preview", "setstarter", "list"), args[1]);
         }
 
         return Collections.emptyList();

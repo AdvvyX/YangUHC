@@ -149,6 +149,28 @@ public class KitManager {
         return name == null ? null : kits.get(name.toLowerCase());
     }
 
+    public String getStarterKitName() {
+        return starterKitName;
+    }
+
+    public boolean deleteKit(String name) {
+        if (name == null) return false;
+        String key = name.toLowerCase();
+        if (kits.remove(key) != null) {
+            config.set("kits." + key, null);
+            if (starterKitName.equalsIgnoreCase(key)) {
+                starterKitName = kits.isEmpty() ? "" : kits.keySet().iterator().next();
+                config.set("starter-kit", starterKitName);
+            }
+            try {
+                config.save(file);
+            } catch (IOException ignored) {
+            }
+            return true;
+        }
+        return false;
+    }
+
     public Kit getStarterKit() {
         return getKit(starterKitName);
     }

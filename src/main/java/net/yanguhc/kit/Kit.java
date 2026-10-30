@@ -35,6 +35,21 @@ public class Kit {
         return items;
     }
 
+    public void clearItems() {
+        items.clear();
+    }
+
+    public void setItems(List<ItemStack> newItems) {
+        items.clear();
+        if (newItems != null) {
+            for (ItemStack item : newItems) {
+                if (item != null && item.getType() != Material.AIR) {
+                    items.add(item.clone());
+                }
+            }
+        }
+    }
+
     public void addItem(ItemStack item) {
         if (item != null && item.getType() != Material.AIR) {
             items.add(item.clone());
@@ -86,7 +101,7 @@ public class Kit {
     }
 
     public void setDelaySeconds(int delaySeconds) {
-        this.delaySeconds = delaySeconds;
+        this.delaySeconds = Math.max(0, delaySeconds);
     }
 
     public List<PotionEffect> getEffects() {
