@@ -5,7 +5,6 @@ import net.yanguhc.game.GameState;
 import net.yanguhc.util.TextUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,7 +14,10 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -37,7 +39,7 @@ public class GameListener implements Listener {
 
         if (state == GameState.LOBBY) {
             plugin.getGameManager().prepareLobbyPlayer(player);
-            TextUtil.sendMessage(player, "<green>¡Bienvenido a <bold>YangUHC</bold>! Usa tus objetos de la barra para configurar escenarios y equipos.");
+            TextUtil.sendMessage(player, "<green>¡Bienvenido a <bold>YangUHC</bold>! Usa <gold>/scenarios</gold> y <gold>/team</gold> para prepararte.");
         } else {
             // Reconnect logic or spectator
             if (!plugin.getGameManager().isAlive(player)) {
@@ -151,38 +153,21 @@ public class GameListener implements Listener {
     }
 
     @EventHandler
-    public void onFoodLoss(org.bukkit.event.entity.FoodLevelChangeEvent event) {
+    public void onFoodLoss(FoodLevelChangeEvent event) {
         if (plugin.getGameManager().getState() == GameState.LOBBY) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
-    public void onDrop(org.bukkit.event.player.PlayerDropItemEvent event) {
+    public void onDrop(PlayerDropItemEvent event) {
         if (plugin.getGameManager().getState() == GameState.LOBBY) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
-    public void onLobbyItemClick(org.bukkit.event.player.PlayerInteractEvent event) {
-        if (plugin.getGameManager().getState() != GameState.LOBBY) return;
-
-        Player player = event.getPlayer();
-        org.bukkit.inventory.ItemStack item = event.getItem();
-        if (item == null) return;
-
-        if (item.getType() == Material.BOOK) {
-            event.setCancelled(true);
-            plugin.getScenarioGUI().open(player);
-        } else if (item.getType() == Material.EMERALD) {
-            event.setCancelled(true);
-            plugin.getTeamGUI().open(player);
-        }
-    }
-
-    @EventHandler
-    public void onInventoryClick(org.bukkit.event.inventory.InventoryClickEvent event) {
+    public void onInventoryClick(InventoryClickEvent event) {
         if (plugin.getGameManager().getState() == GameState.LOBBY) {
             if (!event.getWhoClicked().hasPermission("yanguhc.admin")) {
                 event.setCancelled(true);

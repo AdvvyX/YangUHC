@@ -296,19 +296,6 @@ public class GameManager {
         player.getInventory().clear();
         player.getInventory().setArmorContents(null);
         player.getInventory().setItemInOffHand(null);
-
-        // Lobby items
-        org.bukkit.inventory.ItemStack scenariosItem = new net.yanguhc.util.ItemBuilder(org.bukkit.Material.BOOK)
-                .name("<gold><bold>Escenarios</bold> <gray>(Click derecho)")
-                .lore("<yellow>Haz click para ver los escenarios activos.")
-                .build();
-        org.bukkit.inventory.ItemStack teamItem = new net.yanguhc.util.ItemBuilder(org.bukkit.Material.EMERALD)
-                .name("<aqua><bold>Gestión de Equipos</bold> <gray>(Click derecho)")
-                .lore("<yellow>Haz click para unirte o gestionar tu equipo.")
-                .build();
-
-        player.getInventory().setItem(0, scenariosItem);
-        player.getInventory().setItem(4, teamItem);
     }
 
     public void resetGame() {
