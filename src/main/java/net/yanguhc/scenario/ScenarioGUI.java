@@ -57,11 +57,12 @@ public class ScenarioGUI implements Listener, InventoryHolder {
             lore.add("<gray>" + scenario.getDescription());
             lore.add("");
             lore.add("<white>Estado: " + status);
-            lore.add("<yellow><italic>Click para alternar (Solo Admins/OP)");
+            lore.add("<yellow><italic>Click para alternar");
 
             ItemBuilder builder = new ItemBuilder(scenario.getIcon())
-                    .name((enabled ? "<green><bold>" : "<gray>") + scenario.getName() + "</bold>")
-                    .lore(lore);
+                    .name(enabled ? "<green><bold>" + scenario.getName() + "</bold>" : "<gray>" + scenario.getName())
+                    .lore(lore)
+                    .flags(ItemFlag.HIDE_ATTRIBUTES);
 
             if (enabled) {
                 builder.enchant(Enchantment.UNBREAKING, 1).flags(ItemFlag.HIDE_ENCHANTS);
@@ -98,6 +99,7 @@ public class ScenarioGUI implements Listener, InventoryHolder {
                         "<gray>Activos actualmente: <green><bold>" + activeCount + "</bold><gray>/" + plugin.getScenarioManager().getAllScenarios().size(),
                         "<gray>Los cambios se guardan automáticamente."
                 )
+                .flags(ItemFlag.HIDE_ATTRIBUTES)
                 .build();
         inventory.setItem(49, summary);
     }
