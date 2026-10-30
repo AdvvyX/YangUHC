@@ -72,6 +72,14 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
                 plugin.getGameManager().revivePlayer(target);
                 TextUtil.sendMessage(sender, "<green>Has revivido a " + target.getName() + ".");
             }
+            case "setlobby", "setspawn" -> {
+                if (sender instanceof Player p) {
+                    plugin.getWorldManager().setLobbySpawn(p.getLocation());
+                    TextUtil.sendMessage(p, "<green>¡Spawn del lobby establecido exitosamente en tu posición actual!");
+                } else {
+                    TextUtil.sendMessage(sender, "<red>Solo jugadores pueden establecer el spawn del lobby.");
+                }
+            }
             case "reload" -> {
                 plugin.reloadConfig();
                 plugin.getTeamManager().loadConfig();
@@ -157,6 +165,7 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
         TextUtil.sendMessage(sender, "<yellow>/uhc forcepvp <gray>- Activa el PvP de inmediato");
         TextUtil.sendMessage(sender, "<yellow>/uhc border <shrink|set> <gray>- Controla el borde del mundo");
         TextUtil.sendMessage(sender, "<yellow>/uhc kit <create|preview|setstarter|list> <gray>- Gestor de kits");
+        TextUtil.sendMessage(sender, "<yellow>/uhc setlobby <gray>- Establece el spawn del lobby en tu ubicación");
         TextUtil.sendMessage(sender, "<yellow>/uhc revive <jugador> <gray>- Revive a un jugador");
         TextUtil.sendMessage(sender, "<yellow>/uhc reload <gray>- Recarga las configuraciones");
     }
@@ -166,7 +175,7 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
         if (!sender.hasPermission("yanguhc.admin")) return Collections.emptyList();
 
         if (args.length == 1) {
-            return filter(Arrays.asList("start", "stop", "scenarios", "forcepvp", "border", "kit", "revive", "reload"), args[0]);
+            return filter(Arrays.asList("start", "stop", "scenarios", "forcepvp", "border", "kit", "setlobby", "setspawn", "revive", "reload"), args[0]);
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("border")) {

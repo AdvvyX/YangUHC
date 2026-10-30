@@ -36,11 +36,8 @@ public class GameListener implements Listener {
         plugin.getScoreboardManager().registerPlayer(player);
 
         if (state == GameState.LOBBY) {
-            player.teleport(plugin.getWorldManager().getLobbySpawn());
-            player.setGameMode(GameMode.SURVIVAL);
-            player.setHealth(20.0);
-            player.setFoodLevel(20);
-            TextUtil.sendMessage(player, "<green>¡Bienvenido a <bold>YangUHC</bold>! Usa <gold>/scenarios</gold> y <gold>/team</gold> para prepararte.");
+            plugin.getGameManager().prepareLobbyPlayer(player);
+            TextUtil.sendMessage(player, "<green>¡Bienvenido a <bold>YangUHC</bold>! Usa tus objetos de la barra para configurar escenarios y equipos.");
         } else {
             // Reconnect logic or spectator
             if (!plugin.getGameManager().isAlive(player)) {
@@ -96,6 +93,9 @@ public class GameListener implements Listener {
         GameState state = plugin.getGameManager().getState();
         if (state == GameState.LOBBY || state == GameState.SCATTERING) {
             event.setCancelled(true);
+            if (player.getLocation().getY() < -20) {
+                player.teleport(plugin.getWorldManager().getLobbySpawn());
+            }
             return;
         }
 
@@ -147,6 +147,46 @@ public class GameListener implements Listener {
         if (event.getEntity() instanceof Player && event.getRegainReason() == EntityRegainHealthEvent.RegainReason.SATIATED) {
             // Natural regeneration strictly disabled in UHC
             event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onFoodLoss(org.bukkit.event.entity.FoodLevelChangeEvent event) {
+        if (plugin.getGameManager().getState() == GameState.LOBBY) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onDrop(org.bukkit.event.player.PlayerDropItemEvent event) {
+        if (plugin.getGameManager().getState() == GameState.LOBBY) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onLobbyItemClick(org.bukkit.event.player.PlayerInteractEvent event) {
+        if (plugin.getGameManager().getState() != GameState.LOBBY) return;
+
+        Player player = event.getPlayer();
+        org.bukkit.inventory.ItemStack item = event.getItem();
+        if (item == null) return;
+
+        if (item.getType() == Material.BOOK) {
+            event.setCancelled(true);
+            plugin.getScenarioGUI().open(player);
+        } else if (item.getType() == Material.EMERALD) {
+            event.setCancelled(true);
+            plugin.getTeamGUI().open(player);
+        }
+    }
+
+    @EventHandler
+    public void onInventoryClick(org.bukkit.event.inventory.InventoryClickEvent event) {
+        if (plugin.getGameManager().getState() == GameState.LOBBY) {
+            if (!event.getWhoClicked().hasPermission("yanguhc.admin")) {
+                event.setCancelled(true);
+            }
         }
     }
 }

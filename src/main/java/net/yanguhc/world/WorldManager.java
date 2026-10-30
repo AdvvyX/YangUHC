@@ -85,7 +85,32 @@ public class WorldManager {
         return scatterManager;
     }
 
+    public void setLobbySpawn(Location loc) {
+        if (loc == null || loc.getWorld() == null) return;
+        this.lobbyWorld = loc.getWorld();
+        plugin.getConfig().set("lobby.spawn.world", loc.getWorld().getName());
+        plugin.getConfig().set("lobby.spawn.x", loc.getX());
+        plugin.getConfig().set("lobby.spawn.y", loc.getY());
+        plugin.getConfig().set("lobby.spawn.z", loc.getZ());
+        plugin.getConfig().set("lobby.spawn.yaw", (double) loc.getYaw());
+        plugin.getConfig().set("lobby.spawn.pitch", (double) loc.getPitch());
+        plugin.saveConfig();
+    }
+
     public Location getLobbySpawn() {
+        if (plugin.getConfig().contains("lobby.spawn.world")) {
+            String wName = plugin.getConfig().getString("lobby.spawn.world");
+            World w = Bukkit.getWorld(wName != null ? wName : "world");
+            if (w != null) {
+                double x = plugin.getConfig().getDouble("lobby.spawn.x");
+                double y = plugin.getConfig().getDouble("lobby.spawn.y");
+                double z = plugin.getConfig().getDouble("lobby.spawn.z");
+                float yaw = (float) plugin.getConfig().getDouble("lobby.spawn.yaw");
+                float pitch = (float) plugin.getConfig().getDouble("lobby.spawn.pitch");
+                return new Location(w, x, y, z, yaw, pitch);
+            }
+        }
+
         if (lobbyWorld != null) {
             return lobbyWorld.getSpawnLocation().add(0.5, 0, 0.5);
         }
