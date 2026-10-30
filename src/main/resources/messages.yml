@@ -46,6 +46,9 @@ titles:
   scatter:
     title: "<gold>¡Teleportado!"
     subtitle: "<yellow>Espera a que todos carguen sus chunks"
+  eliminated:
+    title: "<red><bold>¡HAS SIDO ELIMINADO!</bold>"
+    subtitle: "<gray>Ahora estás en modo espectador"
 
 # Teletransporte Seguro (Scatter)
 scatter:

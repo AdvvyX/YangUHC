@@ -5,6 +5,8 @@ import net.yanguhc.game.GameState;
 import net.yanguhc.util.TextUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -21,10 +23,16 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.util.Vector;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GameListener implements Listener {
 
     private final YangUHC plugin;
+    private final Map<UUID, Location> deathLocations = new ConcurrentHashMap<>();
 
     public GameListener(YangUHC plugin) {
         this.plugin = plugin;
@@ -52,6 +60,7 @@ public class GameListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
+        deathLocations.remove(player.getUniqueId());
         plugin.getScoreboardManager().unregisterPlayer(player);
 
         if (plugin.getGameManager().getState().isGameActive() && plugin.getGameManager().isAlive(player)) {
@@ -65,6 +74,9 @@ public class GameListener implements Listener {
         Player killer = player.getKiller();
 
         if (plugin.getGameManager().getState().isGameActive()) {
+            Location deathLoc = player.getLocation().clone();
+            deathLocations.put(player.getUniqueId(), deathLoc);
+
             if (killer != null && killer != player) {
                 plugin.getGameManager().addKill(killer.getUniqueId());
                 event.deathMessage(TextUtil.parse("<red>" + player.getName() + " <gray>fue asesinado por <gold>" + killer.getName() + "<gray>!"));
@@ -72,17 +84,66 @@ public class GameListener implements Listener {
                 event.deathMessage(TextUtil.parse("<red>" + player.getName() + " <gray>ha muerto!"));
             }
 
-            // Put in spectator mode on next tick
+            // Cosmetic lightning bolt effect at death position
+            if (deathLoc.getWorld() != null) {
+                deathLoc.getWorld().strikeLightningEffect(deathLoc);
+            }
+
+            // Immediate auto-respawn and smooth spectator transition
             Bukkit.getScheduler().runTask(plugin, () -> {
+                if (!player.isOnline()) return;
+
+                try {
+                    player.spigot().respawn();
+                } catch (Exception ignored) {
+                }
+
                 plugin.getGameManager().setSpectator(player);
+
+                // Elevate slightly so they don't clip through blocks or fall in the void
+                Location specLoc = deathLoc.clone().add(0, 1.2, 0);
+                if (specLoc.getY() < 10) {
+                    specLoc.setY(64);
+                }
+                player.teleport(specLoc);
+
+                // Aesthetic backward impulse (away from killer or facing direction)
+                Vector impulse;
+                if (killer != null && killer.isOnline() && killer != player) {
+                    Vector diff = deathLoc.toVector().subtract(killer.getLocation().toVector()).setY(0);
+                    if (diff.lengthSquared() > 0.001) {
+                        impulse = diff.normalize().multiply(0.7).setY(0.45);
+                    } else {
+                        impulse = deathLoc.getDirection().setY(0).normalize().multiply(-0.7).setY(0.45);
+                    }
+                } else {
+                    Vector dir = deathLoc.getDirection().setY(0);
+                    if (dir.lengthSquared() > 0.001) {
+                        impulse = dir.normalize().multiply(-0.7).setY(0.45);
+                    } else {
+                        impulse = new Vector(0, 0.45, 0);
+                    }
+                }
+                player.setVelocity(impulse);
+
+                player.playSound(player.getLocation(), Sound.ENTITY_WITHER_DEATH, 0.6f, 1.2f);
+                plugin.getMessages().sendTitle(player, "titles.eliminated.title", "titles.eliminated.subtitle", 5, 50, 15);
             });
         }
     }
 
     @EventHandler
     public void onRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
         if (plugin.getGameManager().getState().isGameActive()) {
-            event.setRespawnLocation(plugin.getWorldManager().getUhcWorld().getSpawnLocation());
+            Location deathLoc = deathLocations.remove(player.getUniqueId());
+            if (deathLoc != null) {
+                Location specLoc = deathLoc.clone().add(0, 1.2, 0);
+                if (specLoc.getY() < 10) specLoc.setY(64);
+                event.setRespawnLocation(specLoc);
+            } else {
+                event.setRespawnLocation(plugin.getWorldManager().getUhcWorld().getSpawnLocation());
+            }
         } else {
             event.setRespawnLocation(plugin.getWorldManager().getLobbySpawn());
         }
