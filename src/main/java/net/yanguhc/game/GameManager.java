@@ -100,7 +100,7 @@ public class GameManager {
             return false;
         }
 
-        plugin.getTeamManager().autoAssignTeams();
+        plugin.getTeamManager().createRandomTeams();
         plugin.getTeamManager().resetTeamsForNewGame();
 
         setState(GameState.SCATTERING);

@@ -122,6 +122,12 @@ public final class TextUtil {
         return components;
     }
 
+    public static void broadcast(String message) {
+        if (message != null && !message.isEmpty()) {
+            org.bukkit.Bukkit.broadcast(parse(message));
+        }
+    }
+
     public static void sendMessage(CommandSender sender, String message) {
         if (sender != null && message != null && !message.isEmpty()) {
             sender.sendMessage(parse(message));

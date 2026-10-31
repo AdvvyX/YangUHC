@@ -106,47 +106,46 @@ public class TeamManager {
         return team;
     }
 
-    public void autoAssignTeams() {
+    public void createRandomTeams() {
+        clearAll();
+
+        List<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
+        if (players.isEmpty()) return;
+
+        Collections.shuffle(players);
+
         if (maxTeamSize <= 1) {
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                if (getTeam(p) == null) {
-                    String teamName = "Equipo " + p.getName();
-                    Team team = createTeam(p, teamName, false);
-                    if (team != null) {
-                        plugin.getMessages().send(p, "teams.auto-created", "team", teamName);
-                    }
+            for (Player p : players) {
+                String teamName = "Equipo " + p.getName();
+                Team team = createTeam(p, teamName, false);
+                if (team != null) {
+                    plugin.getMessages().send(p, "teams.auto-created", "team", teamName);
                 }
             }
         } else {
-            List<Player> unassigned = new ArrayList<>();
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                if (getTeam(p) == null) {
-                    unassigned.add(p);
-                }
-            }
-            Collections.shuffle(unassigned);
-
-            for (Team existingTeam : new ArrayList<>(teams.values())) {
-                while (existingTeam.getMembers().size() < maxTeamSize && !unassigned.isEmpty()) {
-                    Player p = unassigned.remove(0);
-                    existingTeam.addMember(p.getUniqueId());
-                    playerTeamMap.put(p.getUniqueId(), existingTeam);
-                    plugin.getMessages().send(p, "teams.auto-created", "team", existingTeam.getName());
-                }
-            }
-
             Team currentTeam = null;
-            for (Player p : unassigned) {
+            for (Player p : players) {
                 if (currentTeam == null || currentTeam.getMembers().size() >= maxTeamSize) {
                     String teamName = "Equipo #" + (teams.size() + 1);
                     currentTeam = createTeam(p, teamName, false);
-                    if (currentTeam != null) {
-                        plugin.getMessages().send(p, "teams.auto-created", "team", teamName);
-                    }
                 } else {
                     currentTeam.addMember(p.getUniqueId());
                     playerTeamMap.put(p.getUniqueId(), currentTeam);
-                    plugin.getMessages().send(p, "teams.auto-created", "team", currentTeam.getName());
+                }
+            }
+
+            for (Team team : teams.values()) {
+                List<String> memberNames = new ArrayList<>();
+                for (UUID u : team.getMembers()) {
+                    Player mp = Bukkit.getPlayer(u);
+                    if (mp != null) memberNames.add(mp.getName());
+                }
+                String namesStr = String.join(", ", memberNames);
+                for (UUID u : team.getMembers()) {
+                    Player mp = Bukkit.getPlayer(u);
+                    if (mp != null) {
+                        TextUtil.sendMessage(mp, "<gold>¡Equipo Asignado! <gray>Perteneces a " + team.getColorTag() + team.getName() + " <gray>con: <yellow>" + namesStr);
+                    }
                 }
             }
         }
@@ -156,8 +155,12 @@ public class TeamManager {
         }
     }
 
+    public void autoAssignTeams() {
+        createRandomTeams();
+    }
+
     public void autoAssignSoloTeams() {
-        autoAssignTeams();
+        createRandomTeams();
     }
 
     public void resetTeamsForNewGame() {

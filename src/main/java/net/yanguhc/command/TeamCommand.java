@@ -43,6 +43,14 @@ public class TeamCommand implements CommandExecutor, TabCompleter {
             case "leave" -> plugin.getTeamManager().leaveTeam(player);
             case "accept" -> plugin.getTeamManager().acceptInvite(player);
             case "gui", "menu" -> plugin.getTeamGUI().open(player);
+            case "randomize", "random" -> {
+                if (!player.hasPermission("yanguhc.admin") && !player.hasPermission("yanguhc.host") && !player.isOp()) {
+                    plugin.getMessages().send(player, "general.no-permission");
+                    return true;
+                }
+                plugin.getTeamManager().createRandomTeams();
+                TextUtil.broadcast("<green>¡Equipos asignados aleatoriamente por un administrador!");
+            }
             case "invite" -> {
                 if (args.length < 2) {
                     TextUtil.sendMessage(player, "<red>Uso: /team invite <jugador>");
@@ -112,13 +120,20 @@ public class TeamCommand implements CommandExecutor, TabCompleter {
         TextUtil.sendMessage(player, "<yellow>/team leave <gray>- Abandona tu equipo actual");
         TextUtil.sendMessage(player, "<yellow>/team list <gray>- Lista todos los equipos registrados");
         TextUtil.sendMessage(player, "<yellow>/team info [jugador] <gray>- Muestra la información de un equipo");
+        if (player.hasPermission("yanguhc.admin") || player.hasPermission("yanguhc.host") || player.isOp()) {
+            TextUtil.sendMessage(player, "<yellow>/team randomize <gray>- Asigna todos los jugadores a equipos aleatorios");
+        }
         TextUtil.sendMessage(player, "<yellow>/tc <mensaje> <gray>- Habla por el chat exclusivo de tu equipo");
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return filter(Arrays.asList("create", "invite", "accept", "leave", "list", "info", "help", "gui"), args[0]);
+            List<String> options = new ArrayList<>(Arrays.asList("create", "invite", "accept", "leave", "list", "info", "help", "gui"));
+            if (sender.hasPermission("yanguhc.admin") || sender.hasPermission("yanguhc.host") || sender.isOp()) {
+                options.add("randomize");
+            }
+            return filter(options, args[0]);
         }
 
         if (args.length == 2 && (args[0].equalsIgnoreCase("invite") || args[0].equalsIgnoreCase("info"))) {
