@@ -8,14 +8,19 @@ animations:
   titleAnimation:
     change-interval: 200
     texts:
-      - "<gold><bold>YANG UHC</bold>"
-      - "<yellow><bold>YANG UHC</bold>"
-      - "<white><bold>YANG UHC</bold>"
-      - "<yellow><bold>YANG UHC</bold>"
-      - "<gold><bold>YANG UHC</bold>"
-      - "<gradient:#FFAA00:#FF5555><bold>YANG UHC</bold></gradient>"
-      - "<gradient:#FF5555:#FFAA00><bold>YANG UHC</bold></gradient>"
-
+      - "&#FFD27A&lY&#FFB347&la&#FF8A00&ln&#F06A00&lg&#F06A00&lU&#F06A00&lH&#F06A00&lC"
+      - "&#FFB347&lY&#FFD27A&la&#FFB347&ln&#FF8A00&lg&#F06A00&lU&#F06A00&lH&#F06A00&lC"
+      - "&#FF8A00&lY&#FFB347&la&#FFD27A&ln&#FFB347&lg&#FF8A00&lU&#F06A00&lH&#F06A00&lC"
+      - "&#F06A00&lY&#FF8A00&la&#FFB347&ln&#FFD27A&lg&#FFB347&lU&#FF8A00&lH&#F06A00&lC"
+      - "&#F06A00&lY&#F06A00&la&#FF8A00&ln&#FFB347&lg&#FFD27A&lU&#FFB347&lH&#FF8A00&lC"
+      - "&#F06A00&lY&#F06A00&la&#F06A00&ln&#FF8A00&lg&#FFB347&lU&#FFD27A&lH&#FFB347&lC"
+      - "&#F06A00&lY&#F06A00&la&#F06A00&ln&#F06A00&lg&#FF8A00&lU&#FFB347&lH&#FFD27A&lC"
+      - "&#F06A00&lY&#F06A00&la&#F06A00&ln&#FF8A00&lg&#FFB347&lU&#FFD27A&lH&#FFB347&lC"
+      - "&#F06A00&lY&#F06A00&la&#FF8A00&ln&#FFB347&lg&#FFD27A&lU&#FFB347&lH&#FF8A00&lC"
+      - "&#F06A00&lY&#FF8A00&la&#FFB347&ln&#FFD27A&lg&#FFB347&lU&#FF8A00&lH&#F06A00&lC"
+      - "&#FF8A00&lY&#FFB347&la&#FFD27A&ln&#FFB347&lg&#FF8A00&lU&#F06A00&lH&#F06A00&lC"
+      - "&#FFB347&lY&#FFD27A&la&#FFB347&ln&#FF8A00&lg&#F06A00&lU&#F06A00&lH&#F06A00&lC"
+      - "&#FFD27A&lY&#FFB347&la&#FF8A00&ln&#F06A00&lg&#F06A00&lU&#F06A00&lH&#F06A00&lC"
   nameAnimation:
     change-interval: 100
     texts:
@@ -27,12 +32,25 @@ animations:
       - "W I N N E R"
 
   glowIp:
-    change-interval: 150
+    change-interval: 50
     texts:
-      - "<yellow>play.yanguhc.net"
-      - "<gold>play.yanguhc.net"
-      - "<white>play.yanguhc.net"
-      - "<gold>play.yanguhc.net"
+      - "&#FFD27A&lplay.Yang-UHC.net"
+      - "&#FFD27A&lp&#FFD27A&ll&#FFCA6D&la&#FFC260&ly&#FFBB54&l.&#FFB347&lY&#FFA935&la&#FF9E24&ln&#FF9412&lg&#FF8A00&l-&#FB8200&lU&#F87A00&lH&#F47200&lC&#F06A00&l.&#F4841E&ln&#F89E3D&le&#FBB85C&lt"
+      - "&#FBB85C&lp&#FFD27A&ll&#FFD27A&la&#FFCA6D&ly&#FFC260&l.&#FFBB54&lY&#FFB347&la&#FFA935&ln&#FF9E24&lg&#FF9412&l-&#FF8A00&lU&#FB8200&lH&#F87A00&lC&#F47200&l.&#F06A00&ln&#F4841E&le&#F89E3D&lt"
+      - "&#F89E3D&lp&#FBB85C&ll&#FFD27A&la&#FFD27A&ly&#FFCA6D&l.&#FFC260&lY&#FFBB54&la&#FFB347&ln&#FFA935&lg&#FF9E24&l-&#FF9412&lU&#FF8A00&lH&#FB8200&lC&#F87A00&l.&#F47200&ln&#F06A00&le&#F4841E&lt"
+      - "&#F4841E&lp&#F89E3D&ll&#FBB85C&la&#FFD27A&ly&#FFD27A&l.&#FFCA6D&lY&#FFC260&la&#FFBB54&ln&#FFB347&lg&#FFA935&l-&#FF9E24&lU&#FF9412&lH&#FF8A00&lC&#FB8200&l.&#F87A00&ln&#F47200&le&#F06A00&lt"
+      - "&#F06A00&lp&#F4841E&ll&#F89E3D&la&#FBB85C&ly&#FFD27A&l.&#FFD27A&lY&#FFCA6D&la&#FFC260&ln&#FFBB54&lg&#FFB347&l-&#FFA935&lU&#FF9E24&lH&#FF9412&lC&#FF8A00&l.&#FB8200&ln&#F87A00&le&#F47200&lt"
+      - "&#F47200&lp&#F06A00&ll&#F4841E&la&#F89E3D&ly&#FBB85C&l.&#FFD27A&lY&#FFD27A&la&#FFCA6D&ln&#FFC260&lg&#FFBB54&l-&#FFB347&lU&#FFA935&lH&#FF9E24&lC&#FF9412&l.&#FF8A00&ln&#FB8200&le&#F87A00&lt"
+      - "&#F87A00&lp&#F47200&ll&#F06A00&la&#F4841E&ly&#F89E3D&l.&#FBB85C&lY&#FFD27A&la&#FFD27A&ln&#FFCA6D&lg&#FFC260&l-&#FFBB54&lU&#FFB347&lH&#FFA935&lC&#FF9E24&l.&#FF9412&ln&#FF8A00&le&#FB8200&lt"
+      - "&#FB8200&lp&#F87A00&ll&#F47200&la&#F06A00&ly&#F4841E&l.&#F89E3D&lY&#FBB85C&la&#FFD27A&lg&#FFD27A&l-&#FFCA6D&lU&#FFC260&lH&#FFBB54&lC&#FFA935&l.&#FF9E24&ln&#FF9412&le&#FF8A00&lt"
+      - "&#FF8A00&lp&#FB8200&ll&#F87A00&la&#F47200&ly&#F06A00&l.&#F4841E&lY&#F89E3D&la&#FBB85C&ln&#FFD27A&lg&#FFD27A&l-&#FFCA6D&lU&#FFC260&lH&#FFBB54&lC&#FFB347&l.&#FFA935&ln&#FF9E24&le&#FF9412&lt"
+      - "&#FF9412&lp&#FF8A00&ll&#FB8200&la&#F87A00&ly&#F47200&l.&#F06A00&lY&#F4841E&la&#F89E3D&ln&#FBB85C&lg&#FFD27A&l-&#FFD27A&lU&#FFCA6D&lH&#FFC260&lC&#FFBB54&l.&#FFB347&ln&#FFA935&le&#FF9E24&lt"
+      - "&#FF9E24&lp&#FF9412&ll&#FF8A00&la&#FB8200&ly&#F87A00&l.&#F47200&lY&#F06A00&la&#F4841E&ln&#F89E3D&lg&#FBB85C&l-&#FFD27A&lU&#FFD27A&lH&#FFCA6D&lC&#FFC260&l.&#FFBB54&ln&#FFB347&le&#FFA935&lt"
+      - "&#FFA935&lp&#FF9E24&ll&#FF9412&la&#FF8A00&ly&#FB8200&l.&#F87A00&lY&#F47200&la&#F06A00&ln&#F4841E&lg&#F89E3D&l-&#FBB85C&lU&#FFD27A&lH&#FFD27A&lC&#FFCA6D&l.&#FFC260&ln&#FFBB54&le&#FFB347&lt"
+      - "&#FFB347&lp&#FFA935&ll&#FF9E24&la&#FF9412&ly&#FF8A00&l.&#FB8200&lY&#F87A00&la&#F47200&ln&#F06A00&lg&#F4841E&l-&#F89E3D&lU&#FBB85C&lH&#FFD27A&lC&#FFD27A&l.&#FFCA6D&ln&#FFC260&le&#FFBB54&lt"
+      - "&#FFBB54&lp&#FFB347&ll&#FFA935&la&#FF9E24&ly&#FF9412&l.&#FF8A00&lY&#FB8200&la&#F87A00&ln&#F47200&lg&#F06A00&l-&#F4841E&lU&#F89E3D&lH&#FBB85C&lC&#FFD27A&l.&#FFD27A&ln&#FFCA6D&le&#FFC260&lt"
+      - "&#FFC260&lp&#FFBB54&ll&#FFB347&la&#FFA935&ly&#FF9E24&l.&#FF9412&lY&#FF8A00&la&#FB8200&ln&#F87A00&lg&#F47200&l-&#F06A00&lU&#F4841E&lH&#F89E3D&lC&#FBB85C&l.&#FFD27A&ln&#FFD27A&le&#FFCA6D&lt"
+      - "&#FFCA6D&lp&#FFC260&ll&#FFBB54&la&#FFB347&ly&#FFA935&l.&#FF9E24&lY&#FF9412&la&#FF8A00&ln&#FB8200&lg&#F87A00&l-&#F47200&lU&#F06A00&lH&#F4841E&lC&#F89E3D&l.&#FBB85C&ln&#FFD27A&le&#FFD27A&lt"
 
   heartBeat:
     change-interval: 250
