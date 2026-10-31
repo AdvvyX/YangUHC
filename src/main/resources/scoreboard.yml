@@ -1,6 +1,6 @@
 title: '%animation:titleAnimation%'
 update-interval-ticks: 2
-server-ip: play.yanguhc.net
+server-ip: play.battleroyalex.net
 layouts:
   LOBBY:
   - <gray><st>-------------------</st>

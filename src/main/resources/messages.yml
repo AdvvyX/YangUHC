@@ -1,18 +1,17 @@
 # =========================================================
-#                   YANG UHC - MESSAGES
+#              BATTLEROYALEX - MESSAGES
 #     Soporta MiniMessage (<green>, <gradient>, etc.) y Legacy (&a, &#RGB)
-#     Cualquier mensaje puede ser 1 línea o una lista multilinea (-)
+#     Cualquier mensaje puede ser 1 línea o una lista multilínea (-)
 # =========================================================
 
-prefix: "&#EFE452&lY&#F1CF3F&la&#F2B92C&ln&#F4A419&lg &#F3AB1F&lU&#F1C739&lH&#EFE452&lC <gray>»</gray> "
+prefix: "&#EFE452&lB&#F1CF3F&la&#F2B92C&lt&#F4A419&lt&#F3AB1F&ll&#F1C739&le &#EFE452&lR&#F1CF3F&lo&#F2B92C&ly&#F4A419&la&#F3AB1F&ll&#F1C739&le <gray>»</gray> "
 
-# Mensajes
 general:
   no-permission: "<red>No tienes permisos para ejecutar este comando."
   player-not-found: "<red>Jugador no encontrado."
-  config-reloaded: "<green>Configuración de YangUHC recargada exitosamente."
+  config-reloaded: "<green>Configuración de BattleRoyaleX recargada exitosamente."
   welcome:
-    - "<green>¡Bienvenido a <bold>YangUHC</bold>!"
+    - "<green>¡Bienvenido a <bold>Battle Royale</bold>!"
     - "<gray>Usa <gold>/scenarios</gold> y <gold>/team</gold> para prepararte antes de iniciar."
   setlobby-success: "<green>¡Spawn del lobby establecido exitosamente en tu posición actual!"
   game-already-started: "<red>La partida ya ha iniciado o se encuentra en curso."
@@ -20,16 +19,15 @@ general:
   pvp-already-active: "<red>El PvP ya se encuentra activado en esta partida."
   pvp-not-grace: "<red>Solo puedes forzar el PvP durante el periodo de gracia de una partida activa."
   player-already-alive: "<yellow>{player} ya está vivo en la partida."
-  no-players-online: "<red>No hay jugadores conectados para iniciar el UHC."
+  no-players-online: "<red>No hay jugadores conectados para iniciar el Battle Royale."
 
-# Estado de la Partida
 game:
-  game-starting: "<green><bold>¡EL UHC HA COMENZADO!</bold>"
+  game-starting: "<green><bold>¡EL BATTLE ROYALE HA COMENZADO!</bold>"
   grace-period-active: "<yellow>Periodo de gracia activo durante <gold>{minutes} minutos</gold>. El PvP está desactivado."
   pvp-warning: "<red><bold>AVISO</bold> <gray>» El PvP se activará en <yellow>{seconds} segundos</yellow>!"
   pvp-enabled: "<red><bold>¡EL PVP HA SIDO ACTIVADO!</bold> <gray>La protección de gracia ha expirado."
   deathmatch-started: "<dark_red><bold>¡DEATHMATCH INICIADO!</bold> <yellow>El borde se reduce al centro!"
-  game-stopped: "<red><bold>UHC</bold> <gray>» La partida ha sido detenida por un administrador."
+  game-stopped: "<red><bold>BATTLE ROYALE</bold> <gray>» La partida ha sido detenida por un administrador."
   reboot-countdown: "<gray>El servidor se reiniciará en <yellow>{seconds} segundos</yellow>..."
   spectator-eliminated: "<red>Has sido eliminado. Ahora estás en modo espectador."
   player-revived: "<green>¡Has sido revivido por un administrador!"
@@ -38,24 +36,22 @@ game:
   pvp-disabled-grace: "<red>¡El PvP está desactivado durante el periodo de gracia!"
   friendly-fire-disabled: "<red>¡El fuego amigo está desactivado!"
   
-  # Anuncio de Finalización
   game-ended:
     - "&7&m----------------------------------------"
-    - "<yellow><bold>        ¡YANG UHC HA FINALIZADO!        "
+    - "<yellow><bold>      ¡BATTLE ROYALE HA FINALIZADO!      "
     - "<white>Ganador de la partida: <green><bold>{winner}</bold>"
     - "&7&m----------------------------------------"
 
-# Títulos y Subtítulos
 titles:
   start:
-    title: "&#52EF76&lU&#4CEB70&lH&#45E86B&lC &#39E15F&lI&#32DD5A&ln&#2CDA54&li&#26D64E&lc&#20D348&li&#19CF43&la&#13CC3D&ld&#0DC837&lo&#06C532&l!&#00C12C&l."
+    title: "&#52EF76&lB&#4CEB70&la&#45E86B&lt&#39E15F&lt&#32DD5A&ll&#2CDA54&le &#26D64E&lR&#20D348&lo&#19CF43&ly&#13CC3D&la&#0DC837&ll&#06C532&le&#00C12C&l!"
     subtitle: "<yellow>Recolecta recursos y prepárate"
   pvp:
     title: "<red><bold>🗡 PVP ACTIVADO 🗡</bold>"
     subtitle: "<yellow>Que gane el mejor"
   victory:
-    title: "<gold><bold>🏆 VICTORIA 🏆</bold>"
-    subtitle: "<yellow>Team Ganador: {winner}"
+    title: "<gold><bold>🏆 VICTORIA ROYALE 🏆</bold>"
+    subtitle: "<yellow>Ganador: {winner}"
   scatter:
     title: "<gold>¡Teleportado!"
     subtitle: "<yellow>Espera a que todos carguen sus chunks"
@@ -63,7 +59,6 @@ titles:
     title: "<red><bold>☠ ¡HAS SIDO ELIMINADO! ☠</bold>"
     subtitle: "<gray>Ahora estás en modo espectador"
 
-# SAFE TELEPORT
 scatter:
   starting: "<gold><bold>SCATTER</bold> <gray>» <yellow>Iniciando teleportación segura para <aqua>{groups} grupos</aqua>..."
   completed: "<green><bold>¡SCATTER COMPLETADO!</bold> <gray>Todos los jugadores han sido ubicados."
@@ -72,7 +67,6 @@ border:
   shrinking: "<gold><bold>BORDE</bold> <gray>» <yellow>El borde se está reduciendo a <red>±{radius} bloques</red> en <aqua>{seconds}s</aqua>!"
   set: "<green>Borde establecido a ±{radius} bloques."
 
-# Kits
 kits:
   received: "<green>¡Has recibido el kit <bold>{kit}</bold>!"
   delayed-warning: "<yellow><bold>KITS</bold> <gray>» El kit <gold>{kit}</gold> se entregará en <gold>{seconds} segundos</gold>!"
@@ -85,7 +79,6 @@ kits:
   set-starter: "<green>El kit <bold>{kit}</bold> es ahora el kit inicial de la partida."
   not-found: "<red>Kit no encontrado."
 
-# Escenarios
 scenarios:
   toggled: "<gold><bold>ESCENARIOS</bold> <gray>» El escenario <yellow>{scenario}</yellow> ha sido {status}."
   status-enabled: "<green>activado</green>"
@@ -98,7 +91,6 @@ scenarios:
   noclean-protect: "<green>NoClean activo: Eres invulnerable durante <gold>20 segundos</gold> (se cancela si atacas a otro jugador)."
   noclean-cancelled: "<yellow>Has atacado a un jugador: tu protección NoClean ha sido desactivada."
 
-# Teams
 teams:
   created: "<green>Has creado el equipo <bold>{team}</bold> exitosamente."
   auto-created: "<yellow><bold>TEAMS</bold> <gray>» <green>Se te ha asignado automáticamente el <bold>{team}</bold> para la partida."
@@ -109,7 +101,7 @@ teams:
   left-broadcast: "<red>{player} ha salido del equipo."
   full: "<red>El equipo ya está lleno ({max} miembros máx)."
   invite-sent: "<green>Invitación enviada a {player}."
-  invite-received: "<gold><bold>UHC TEAMS</bold> <gray>» <yellow>{player} te ha invitado a su equipo. Escribe <green><click:run_command:'/team accept'>/team accept</click></green> para unirte."
+  invite-received: "<gold><bold>BATTLE ROYALE</bold> <gray>» <yellow>{player} te ha invitado a su equipo. Escribe <green><click:run_command:'/team accept'>/team accept</click></green> para unirte."
   no-invite: "<red>No tienes ninguna invitación pendiente."
   invite-expired: "<red>La invitación ya no es válida."
   chat-enabled: "<green>Chat de equipo <bold>activado</bold>. Todos tus mensajes irán a tu equipo."

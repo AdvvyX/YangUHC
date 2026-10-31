@@ -1,21 +1,14 @@
 # =========================================================
-#                   YANG UHC CONFIGURATION
+#              BATTLEROYALEX CONFIGURATION
 # =========================================================
 
-# Configuración del Mundo y Generador
 world:
-  # Nombre del mundo donde se jugará el UHC
-  name: "uhc_world"
-  # Nombre del mundo donde estará la sala de espera
+  name: "battleroyale_world"
   lobby-name: "world"
-  # Semilla personalizada (0 para aleatoria)
   seed: 0
 
-# Configuración del Borde del Mundo
 border:
-  # Radio inicial del borde (1000 = ±1000 bloques, tamaño total 2000x2000)
   initial-radius: 1000.0
-  # Fases de reducción de radio de borde
   stages:
     - 1000.0
     - 750.0
@@ -25,16 +18,13 @@ border:
     - 50.0
     - 30.0
 
-# Reglas de la Partida
 game:
   grace-period-seconds: 1200
   natural-regeneration: false
 
-# Configuración de Equipos (Teams)
 teams:
-  # Tamaño máximo de miembros por equipo (1 = FFA/Solo, 2 = To2, 3 = To3, etc.)
   max-size: 2
   friendly-fire: false
 
 server:
-  ip: "play.yanguhc.net"
+  ip: "play.battleroyalex.net"

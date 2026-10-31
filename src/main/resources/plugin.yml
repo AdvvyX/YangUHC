@@ -1,19 +1,20 @@
-name: YangUHC
+name: BattleRoyaleX
 version: 1.0.0
-main: net.yanguhc.YangUHC
+main: net.battleroyalex.BattleRoyaleX
 api-version: '1.21'
 author: Advvy
-description: Sistema avanzado y completo de Ultra Hardcore (UHC) para Minecraft 1.21+
+description: Sistema avanzado y completo de Battle Royale para Minecraft 1.21+
 
 commands:
-  uhc:
-    description: Comando principal de administración de UHC
-    permission: yanguhc.admin
-    usage: /<command> [start|stop|scenarios|forcepvp|border|kit|revive|reload]
+  battleroyale:
+    description: Comando principal de administración de Battle Royale
+    permission: battleroyale.admin
+    usage: /<command> [start|stop|scenarios|forcepvp|border|kit|teamsize|revive|reload]
+    aliases: [br, uhc]
   team:
-    description: Gestión de equipos de UHC
-    usage: /<command> [create|invite|accept|leave|list]
-    aliases: [teams]
+    description: Gestión de equipos de Battle Royale
+    usage: /<command> [create|invite|accept|leave|list|size|randomize]
+    aliases: [teams, t]
   tc:
     description: Chat exclusivo de equipo
     usage: /<command> [mensaje]
@@ -24,9 +25,9 @@ commands:
     aliases: [escenarios, sc]
 
 permissions:
-  yanguhc.admin:
-    description: Permiso total para gestionar la partida de UHC
+  battleroyale.admin:
+    description: Permiso total para gestionar la partida de Battle Royale
     default: op
-  yanguhc.host:
+  battleroyale.host:
     description: Permiso para hostear partidas y alternar escenarios
     default: op
