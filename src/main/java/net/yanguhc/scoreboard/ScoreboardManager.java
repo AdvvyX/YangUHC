@@ -151,16 +151,12 @@ public class ScoreboardManager {
             Team team = plugin.getTeamManager().getTeam(p);
             if (team != null) {
                 String colorTag = team.getColorTag() != null ? team.getColorTag() : "<yellow>";
-                Component displayName = TextUtil.parse(colorTag + "[" + team.getName() + "] <white>" + p.getName());
-                p.displayName(displayName);
-                p.playerListName(displayName);
-                p.customName(displayName);
-                p.setCustomNameVisible(true);
+                Component listName = TextUtil.parse(colorTag + "[" + team.getName() + "] <white>" + p.getName());
+                p.playerListName(listName);
+                p.displayName(Component.text(p.getName()));
             } else {
-                p.displayName(TextUtil.parse("<white>" + p.getName()));
-                p.playerListName(TextUtil.parse("<white>" + p.getName()));
-                p.customName(null);
-                p.setCustomNameVisible(false);
+                p.displayName(Component.text(p.getName()));
+                p.playerListName(Component.text(p.getName()));
             }
         }
     }

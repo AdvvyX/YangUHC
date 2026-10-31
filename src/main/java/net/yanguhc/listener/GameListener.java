@@ -92,7 +92,7 @@ public class GameListener implements Listener {
             }
             return Component.empty()
                     .append(prefix)
-                    .append(sourceDisplayName)
+                    .append(Component.text(player.getName()))
                     .append(TextUtil.parse("<gray>: </gray>"))
                     .append(message);
         });
