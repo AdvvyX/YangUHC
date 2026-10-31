@@ -1,6 +1,7 @@
 # =========================================================
 #                   YANG UHC - MESSAGES
 #     Soporta MiniMessage (<green>, <gradient>, etc.) y Legacy (&a)
+#     Cualquier mensaje puede ser 1 línea o una lista multilinea (-)
 # =========================================================
 
 prefix: "<gold><bold>YangUHC</bold> <gray>»</gray> "
@@ -10,7 +11,9 @@ general:
   no-permission: "<red>No tienes permisos para ejecutar este comando."
   player-not-found: "<red>Jugador no encontrado."
   config-reloaded: "<green>Configuración de YangUHC recargada exitosamente."
-  welcome: "<green>¡Bienvenido a <bold>YangUHC</bold>! Usa <gold>/scenarios</gold> y <gold>/team</gold> para prepararte."
+  welcome:
+    - "<green>¡Bienvenido a <bold>YangUHC</bold>!"
+    - "<gray>Usa <gold>/scenarios</gold> y <gold>/team</gold> para prepararte antes de iniciar."
   setlobby-success: "<green>¡Spawn del lobby establecido exitosamente en tu posición actual!"
 
 # Estado de la Partida
@@ -28,9 +31,13 @@ game:
   player-disconnect: "<red>{player} se ha desconectado durante la partida."
   pvp-disabled-grace: "<red>¡El PvP está desactivado durante el periodo de gracia!"
   friendly-fire-disabled: "<red>¡El fuego amigo está desactivado!"
-  ended-header: "<gold><bold>==============================</bold>"
-  ended-title: "<yellow><bold>           ¡YANG UHC HA FINALIZADO!           </bold>"
-  ended-winner: "<white>Ganador: <green><bold>{winner}</bold>"
+  
+  # Anuncio de Finalización (Multilínea totalmente configurable)
+  game-ended:
+    - "<gold><bold>========================================"
+    - "<yellow><bold>        ¡YANG UHC HA FINALIZADO!        "
+    - "<white>Ganador de la partida: <green><bold>{winner}</bold>"
+    - "<gold><bold>========================================"
 
 # Títulos y Subtítulos en Pantalla
 titles:

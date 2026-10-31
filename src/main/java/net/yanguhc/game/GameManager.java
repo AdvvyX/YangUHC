@@ -259,10 +259,8 @@ public class GameManager {
             winnerName = player.getName();
         }
 
-        plugin.getMessages().broadcast("game.ended-header");
-        plugin.getMessages().broadcast("game.ended-title");
-        plugin.getMessages().broadcast("game.ended-winner", "winner", winnerName);
-        plugin.getMessages().broadcast("game.ended-header");
+        // Broadcast multiline game-ended announcement
+        plugin.getMessages().broadcast("game.game-ended", "winner", winnerName);
 
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.playSound(p.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1f, 1f);

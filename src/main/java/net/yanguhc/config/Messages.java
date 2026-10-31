@@ -13,6 +13,9 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Messages {
 
@@ -49,21 +52,39 @@ public class Messages {
         return config.getString(path, "<red>Mensaje no configurado: " + path);
     }
 
-    public String getFormatted(String path, Object... placeholders) {
-        String msg = getRaw(path);
-        if (placeholders != null && placeholders.length > 0) {
-            for (int i = 0; i < placeholders.length; i += 2) {
-                if (i + 1 < placeholders.length) {
-                    String key = String.valueOf(placeholders[i]);
-                    String val = String.valueOf(placeholders[i + 1]);
-                    msg = msg.replace("{" + key + "}", val);
+    public List<String> getFormattedList(String path, Object... placeholders) {
+        List<String> rawLines;
+        if (config.isList(path)) {
+            rawLines = config.getStringList(path);
+        } else if (config.contains(path)) {
+            rawLines = Collections.singletonList(config.getString(path));
+        } else {
+            rawLines = Collections.singletonList("<red>Mensaje no configurado: " + path);
+        }
+
+        List<String> formatted = new ArrayList<>();
+        for (String line : rawLines) {
+            String msg = line;
+            if (placeholders != null && placeholders.length > 0) {
+                for (int i = 0; i < placeholders.length; i += 2) {
+                    if (i + 1 < placeholders.length) {
+                        String key = String.valueOf(placeholders[i]);
+                        String val = String.valueOf(placeholders[i + 1]);
+                        msg = msg.replace("{" + key + "}", val);
+                    }
                 }
             }
+            if (plugin.getAnimationManager() != null) {
+                msg = plugin.getAnimationManager().replaceAnimations(msg);
+            }
+            formatted.add(msg);
         }
-        if (plugin.getAnimationManager() != null) {
-            msg = plugin.getAnimationManager().replaceAnimations(msg);
-        }
-        return msg;
+        return formatted;
+    }
+
+    public String getFormatted(String path, Object... placeholders) {
+        List<String> list = getFormattedList(path, placeholders);
+        return list.isEmpty() ? "" : list.get(0);
     }
 
     public Component get(String path, Object... placeholders) {
@@ -72,11 +93,15 @@ public class Messages {
 
     public void send(CommandSender sender, String path, Object... placeholders) {
         if (sender == null) return;
-        sender.sendMessage(get(path, placeholders));
+        for (String line : getFormattedList(path, placeholders)) {
+            sender.sendMessage(TextUtil.parse(line));
+        }
     }
 
     public void broadcast(String path, Object... placeholders) {
-        Bukkit.broadcast(get(path, placeholders));
+        for (String line : getFormattedList(path, placeholders)) {
+            Bukkit.broadcast(TextUtil.parse(line));
+        }
     }
 
     public void sendTitle(Player player, String titlePath, String subtitlePath, int fadeIn, int stay, int fadeOut, Object... placeholders) {
