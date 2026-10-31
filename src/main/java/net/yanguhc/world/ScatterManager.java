@@ -11,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -86,7 +87,7 @@ public class ScatterManager {
 
         plugin.getMessages().broadcast("scatter.starting", "groups", totalGroups);
 
-        List<int[]> targetPoints = generateSpacedPoints((int) radius, totalGroups);
+        List<int[]> targetPoints = generateSpacedPoints(world, (int) radius, totalGroups);
 
         Set<Long> uniqueChunkKeys = new HashSet<>();
         List<int[]> chunksToPreload = new ArrayList<>();
@@ -159,12 +160,7 @@ public class ScatterManager {
                 int[] point = targetPoints.get(index);
                 index++;
 
-                Location loc = LocationUtil.getSafeHighestLocation(world, point[0], point[1]);
-                if (loc == null || !LocationUtil.isSafeLocation(loc)) {
-                    int y = Math.max(70, world.getHighestBlockYAt(point[0], point[1]));
-                    loc = new Location(world, point[0] + 0.5, y + 1.0, point[1] + 0.5);
-                }
-
+                Location loc = findSafeScatterLocation(world, point[0], point[1]);
                 createCage(loc);
 
                 for (Player player : group) {
@@ -183,6 +179,27 @@ public class ScatterManager {
                 }
             }
         }.runTaskTimer(plugin, 2L, 4L);
+    }
+
+    private Location findSafeScatterLocation(World world, int targetX, int targetZ) {
+        Location loc = LocationUtil.getSafeHighestLocation(world, targetX, targetZ);
+        if (loc != null && LocationUtil.isSafeLocation(loc)) {
+            return loc;
+        }
+
+        for (int r = 8; r <= 64; r += 8) {
+            for (int dx = -r; dx <= r; dx += 8) {
+                for (int dz = -r; dz <= r; dz += 8) {
+                    Location candidate = LocationUtil.getSafeHighestLocation(world, targetX + dx, targetZ + dz);
+                    if (candidate != null && LocationUtil.isSafeLocation(candidate)) {
+                        return candidate;
+                    }
+                }
+            }
+        }
+
+        int y = Math.max(70, world.getHighestBlockYAt(targetX, targetZ));
+        return new Location(world, targetX + 0.5, y + 1.0, targetZ + 0.5);
     }
 
     private void createCage(Location center) {
@@ -277,7 +294,7 @@ public class ScatterManager {
         }.runTaskTimer(plugin, 10L, 20L);
     }
 
-    private List<int[]> generateSpacedPoints(int radius, int count) {
+    private List<int[]> generateSpacedPoints(World world, int radius, int count) {
         List<int[]> points = new ArrayList<>();
         double minDistance = Math.max(40, (radius * 1.5) / Math.max(1, Math.sqrt(count)));
 
@@ -286,9 +303,16 @@ public class ScatterManager {
             int bestZ = 0;
             boolean found = false;
 
-            for (int attempt = 0; attempt < 50; attempt++) {
+            for (int attempt = 0; attempt < 80; attempt++) {
                 int x = random.nextInt(radius * 2) - radius;
                 int z = random.nextInt(radius * 2) - radius;
+
+                if (world != null) {
+                    Biome biome = world.getBiome(x, 64, z);
+                    if (LocationUtil.isBlacklistedBiome(biome)) {
+                        continue;
+                    }
+                }
 
                 boolean tooClose = false;
                 for (int[] existing : points) {
@@ -308,8 +332,24 @@ public class ScatterManager {
             }
 
             if (!found) {
-                bestX = random.nextInt(radius * 2) - radius;
-                bestZ = random.nextInt(radius * 2) - radius;
+                for (int attempt = 0; attempt < 50; attempt++) {
+                    int x = random.nextInt(radius * 2) - radius;
+                    int z = random.nextInt(radius * 2) - radius;
+                    if (world != null) {
+                        Biome biome = world.getBiome(x, 64, z);
+                        if (LocationUtil.isBlacklistedBiome(biome)) {
+                            continue;
+                        }
+                    }
+                    bestX = x;
+                    bestZ = z;
+                    found = true;
+                    break;
+                }
+                if (!found) {
+                    bestX = random.nextInt(radius * 2) - radius;
+                    bestZ = random.nextInt(radius * 2) - radius;
+                }
             }
 
             points.add(new int[]{bestX, bestZ});

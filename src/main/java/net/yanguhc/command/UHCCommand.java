@@ -39,6 +39,13 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
 
         String sub = args[0].toLowerCase();
         switch (sub) {
+            case "config" -> {
+                if (sender instanceof Player p) {
+                    plugin.getConfigGUI().open(p);
+                } else {
+                    TextUtil.sendMessage(sender, "<red>Solo jugadores pueden abrir el menú de configuración.");
+                }
+            }
             case "start" -> {
                 GameState state = plugin.getGameManager().getState();
                 if (state != GameState.LOBBY) {
@@ -110,19 +117,17 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
                 if (plugin.getGameManager().isAlive(target)) {
-                    plugin.getMessages().send(sender, "general.player-already-alive", "player", target.getName());
+                    TextUtil.sendMessage(sender, "<red>Ese jugador ya está vivo.");
                     return true;
                 }
                 plugin.getGameManager().revivePlayer(target);
-                plugin.getMessages().send(sender, "game.player-revived-broadcast", "player", target.getName());
             }
             case "reload" -> {
+                plugin.reloadConfig();
                 plugin.getMessages().reload();
                 plugin.getAnimationManager().reload();
                 plugin.getScoreboardManager().reload();
-                plugin.getKitManager().loadKits();
-                plugin.reloadConfig();
-                plugin.getMessages().send(sender, "general.config-reloaded");
+                TextUtil.sendMessage(sender, "<green>¡Configuraciones recargadas exitosamente!");
             }
             default -> sendHelp(sender);
         }
@@ -131,172 +136,198 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
 
     private void handleBorder(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            TextUtil.sendMessage(sender, "<yellow>Uso: /uhc border <shrink|set> [parámetros]");
+            double current = plugin.getWorldManager().getBorderController().getCurrentRadius();
+            TextUtil.sendMessage(sender, "<yellow>Radio actual del borde: <gold>±" + (int) current);
+            TextUtil.sendMessage(sender, "<gray>Uso: /uhc border <set|shrink> <radio> [tiempo_segundos]");
             return;
         }
+
         String action = args[1].toLowerCase();
-        if (action.equals("shrink")) {
-            if (!plugin.getGameManager().getState().isGameActive()) {
-                plugin.getMessages().send(sender, "general.game-not-active");
+        if (action.equals("set")) {
+            if (args.length < 3) {
+                TextUtil.sendMessage(sender, "<red>Uso: /uhc border set <radio>");
                 return;
             }
-            if (args.length >= 4) {
+            try {
                 double radius = Double.parseDouble(args[2]);
-                long seconds = Long.parseLong(args[3]);
-                plugin.getWorldManager().getBorderController().shrinkTo(radius, seconds);
-            } else {
-                plugin.getWorldManager().getBorderController().shrinkNextStage(120);
+                plugin.getWorldManager().getBorderController().resetBorder(radius);
+                TextUtil.sendMessage(sender, "<green>Borde fijado en ±" + (int) radius + " bloques.");
+            } catch (NumberFormatException e) {
+                TextUtil.sendMessage(sender, "<red>El radio debe ser un número válido.");
             }
-        } else if (action.equals("set") && args.length >= 3) {
-            double radius = Double.parseDouble(args[2]);
-            plugin.getWorldManager().getBorderController().resetBorder(radius);
-            plugin.getMessages().broadcast("border.set", "radius", (int) radius);
+        } else if (action.equals("shrink")) {
+            if (args.length < 3) {
+                TextUtil.sendMessage(sender, "<red>Uso: /uhc border shrink <radio> [segundos]");
+                return;
+            }
+            try {
+                double radius = Double.parseDouble(args[2]);
+                long seconds = args.length >= 4 ? Long.parseLong(args[3]) : 60;
+                plugin.getWorldManager().getBorderController().shrinkTo(radius, seconds);
+            } catch (NumberFormatException e) {
+                TextUtil.sendMessage(sender, "<red>Los parámetros deben ser números válidos.");
+            }
         }
     }
 
     private void handleKit(CommandSender sender, String[] args) {
-
         if (args.length < 2) {
             if (sender instanceof Player p) {
                 plugin.getKitManagerGUI().open(p);
-                return;
+            } else {
+                TextUtil.sendMessage(sender, "<gray>Kits disponibles: <yellow>" + String.join(", ", plugin.getKitManager().getAllKits().stream().map(Kit::getName).toList()));
+                TextUtil.sendMessage(sender, "<gray>Uso: /uhc kit <gui|create|delete|setstarter> [nombre] [delay]");
             }
-            TextUtil.sendMessage(sender, "<yellow>Uso: /uhc kit <enable|disable|toggle|create|edit|preview|delete|list> [argumentos]");
             return;
         }
 
-        String sub = args[1].toLowerCase();
-        if (sub.equals("create") && sender instanceof Player p) {
-            if (args.length < 3) {
-                TextUtil.sendMessage(p, "<red>Uso: /uhc kit create <nombre> [demora_seg]");
-                return;
+        String action = args[1].toLowerCase();
+        switch (action) {
+            case "gui", "manage" -> {
+                if (sender instanceof Player p) {
+                    plugin.getKitManagerGUI().open(p);
+                } else {
+                    TextUtil.sendMessage(sender, "<red>Solo jugadores pueden abrir el gestor de kits.");
+                }
             }
-            String name = args[2];
-            int delay = args.length >= 4 ? Integer.parseInt(args[3]) : 0;
-            plugin.getKitManager().createKitFromPlayer(name, p, delay);
-        } else if (sub.equals("enable")) {
-            if (args.length < 3) {
-                TextUtil.sendMessage(sender, "<red>Uso: /uhc kit enable <nombre>");
-                return;
+            case "create" -> {
+                if (!(sender instanceof Player p)) {
+                    TextUtil.sendMessage(sender, "<red>Solo jugadores pueden crear kits.");
+                    return;
+                }
+                if (args.length < 3) {
+                    TextUtil.sendMessage(sender, "<red>Uso: /uhc kit create <nombre> [delaySegundos]");
+                    return;
+                }
+                String name = args[2];
+                int delay = 0;
+                if (args.length >= 4) {
+                    try {
+                        delay = Integer.parseInt(args[3]);
+                    } catch (NumberFormatException e) {
+                        TextUtil.sendMessage(sender, "<red>El delay debe ser un número de segundos válido.");
+                        return;
+                    }
+                }
+                plugin.getKitManager().createKitFromPlayer(name, p, delay);
             }
-            Kit kit = plugin.getKitManager().getKit(args[2]);
-            if (kit == null) {
-                plugin.getMessages().send(sender, "kits.not-found");
-                return;
+            case "edit" -> {
+                if (!(sender instanceof Player p)) {
+                    TextUtil.sendMessage(sender, "<red>Solo jugadores pueden editar kits.");
+                    return;
+                }
+                if (args.length < 3) {
+                    TextUtil.sendMessage(sender, "<red>Uso: /uhc kit edit <nombre>");
+                    return;
+                }
+                Kit k = plugin.getKitManager().getKit(args[2]);
+                if (k == null) {
+                    TextUtil.sendMessage(sender, "<red>No se encontró ningún kit con ese nombre.");
+                    return;
+                }
+                plugin.getKitEditorGUI().open(p, k);
             }
-            kit.setEnabled(true);
-            plugin.getKitManager().saveKit(kit);
-            plugin.getMessages().send(sender, "kits.enabled", "kit", kit.getName());
-        } else if (sub.equals("disable")) {
-            if (args.length < 3) {
-                TextUtil.sendMessage(sender, "<red>Uso: /uhc kit disable <nombre>");
-                return;
+            case "delete", "remove" -> {
+                if (args.length < 3) {
+                    TextUtil.sendMessage(sender, "<red>Uso: /uhc kit delete <nombre>");
+                    return;
+                }
+                String name = args[2];
+                boolean deleted = plugin.getKitManager().deleteKit(name);
+                if (deleted) {
+                    plugin.getMessages().send(sender, "kits.deleted", "kit", name);
+                } else {
+                    plugin.getMessages().send(sender, "kits.not-found", "kit", name);
+                }
             }
-            Kit kit = plugin.getKitManager().getKit(args[2]);
-            if (kit == null) {
-                plugin.getMessages().send(sender, "kits.not-found");
-                return;
+            case "setstarter" -> {
+                if (args.length < 3) {
+                    TextUtil.sendMessage(sender, "<red>Uso: /uhc kit setstarter <nombre>");
+                    return;
+                }
+                String name = args[2];
+                Kit kit = plugin.getKitManager().getKit(name);
+                if (kit == null) {
+                    plugin.getMessages().send(sender, "kits.not-found", "kit", name);
+                    return;
+                }
+                plugin.getKitManager().setStarterKitName(name);
+                plugin.getMessages().send(sender, "kits.starter-set", "kit", name);
             }
-            kit.setEnabled(false);
-            plugin.getKitManager().saveKit(kit);
-            plugin.getMessages().send(sender, "kits.disabled", "kit", kit.getName());
-        } else if (sub.equals("toggle")) {
-            if (args.length < 3) {
-                TextUtil.sendMessage(sender, "<red>Uso: /uhc kit toggle <nombre>");
-                return;
+            case "list" -> {
+                TextUtil.sendMessage(sender, "<gold><bold>Kits configurados:");
+                for (Kit k : plugin.getKitManager().getAllKits()) {
+                    String status = k.isEnabled() ? "<green>[ON]" : "<red>[OFF]";
+                    String starter = k.getName().equalsIgnoreCase(plugin.getKitManager().getStarterKitName()) ? " <gold>(Starter)" : "";
+                    String delay = k.getDelaySeconds() > 0 ? " <gray>(Delay: " + TimeUtil.formatSeconds(k.getDelaySeconds()) + ")" : " <gray>(Inicio)";
+                    TextUtil.sendMessage(sender, "  <yellow>• " + k.getName() + " " + status + starter + delay);
+                }
             }
-            Kit kit = plugin.getKitManager().getKit(args[2]);
-            if (kit == null) {
-                plugin.getMessages().send(sender, "kits.not-found");
-                return;
+            default -> {
+                TextUtil.sendMessage(sender, "<red>Subcomando de kit desconocido. Usa: gui, create, edit, delete, setstarter, list");
             }
-            kit.setEnabled(!kit.isEnabled());
-            plugin.getKitManager().saveKit(kit);
-            plugin.getMessages().send(sender, kit.isEnabled() ? "kits.enabled" : "kits.disabled", "kit", kit.getName());
-        } else if (sub.equals("delete")) {
-            if (args.length < 3) {
-                TextUtil.sendMessage(sender, "<red>Uso: /uhc kit delete <nombre>");
-                return;
-            }
-            if (plugin.getKitManager().deleteKit(args[2])) {
-                plugin.getMessages().send(sender, "kits.deleted", "kit", args[2]);
-            } else {
-                plugin.getMessages().send(sender, "kits.not-found");
-            }
-        } else if ((sub.equals("edit") || sub.equals("preview")) && sender instanceof Player p) {
-            if (args.length < 3) {
-                TextUtil.sendMessage(p, "<red>Uso: /uhc kit edit <nombre>");
-                return;
-            }
-            Kit kit = plugin.getKitManager().getKit(args[2]);
-            if (kit == null) {
-                plugin.getMessages().send(p, "kits.not-found");
-                return;
-            }
-            if (sub.equals("edit")) {
-                plugin.getKitEditorGUI().open(p, kit);
-            } else {
-                plugin.getKitGUI().openPreview(p, kit);
-            }
-        } else if (sub.equals("list")) {
-            TextUtil.sendMessage(sender, "<gold><bold>Kits Configurados YangUHC:</bold>");
-            for (Kit k : plugin.getKitManager().getAllKits()) {
-                String state = k.isEnabled() ? "<green>[ACTIVADO]</green>" : "<red>[DESACTIVADO]</red>";
-                String delayStr = k.getDelaySeconds() == 0 ? "Al inicio (0s)" : TimeUtil.formatSeconds(k.getDelaySeconds());
-                TextUtil.sendMessage(sender, "<yellow>- " + k.getName() + " " + state + " <gray>(Entrega: " + delayStr + ", Ítems: " + k.getItems().size() + ")");
-            }
-        } else if (sender instanceof Player p) {
-            plugin.getKitManagerGUI().open(p);
         }
     }
 
     private void sendHelp(CommandSender sender) {
-        TextUtil.sendMessage(sender, "<gold><bold>--- YangUHC Comandos Admin ---</bold>");
-        TextUtil.sendMessage(sender, "<yellow>/uhc start <gray>- Inicia la partida y el scatter");
-        TextUtil.sendMessage(sender, "<yellow>/uhc stop <gray>- Detiene la partida");
-        TextUtil.sendMessage(sender, "<yellow>/uhc scenarios <gray>- Abre el gestor de escenarios");
-        TextUtil.sendMessage(sender, "<yellow>/uhc forcepvp <gray>- Activa el PvP de inmediato");
-        TextUtil.sendMessage(sender, "<yellow>/uhc border <shrink|set> <gray>- Controla el borde del mundo");
-        TextUtil.sendMessage(sender, "<yellow>/uhc kits <gray>- Abre el menú interactivo para elegir y activar kits");
-        TextUtil.sendMessage(sender, "<yellow>/uhc setlobby <gray>- Establece el spawn del lobby en tu ubicación");
-        TextUtil.sendMessage(sender, "<yellow>/uhc revive <jugador> <gray>- Revive a un jugador");
-        TextUtil.sendMessage(sender, "<yellow>/uhc reload <gray>- Recarga las configuraciones y messages.yml");
+        TextUtil.sendMessage(sender, "<gold><bold>=== YangUHC Comandos de Administración ===");
+        TextUtil.sendMessage(sender, "<yellow>/uhc config <gray>- Configuración interactiva previa (Borde, Kits, PvP, Teams).");
+        TextUtil.sendMessage(sender, "<yellow>/uhc start <gray>- Inicia la partida UHC.");
+        TextUtil.sendMessage(sender, "<yellow>/uhc stop <gray>- Detiene la partida actual.");
+        TextUtil.sendMessage(sender, "<yellow>/uhc forcepvp <gray>- Activa el PvP inmediatamente.");
+        TextUtil.sendMessage(sender, "<yellow>/uhc scenarios <gray>- Abre el menú de escenarios.");
+        TextUtil.sendMessage(sender, "<yellow>/uhc kit [gui|create|edit|delete|setstarter|list] <gray>- Gestiona los kits.");
+        TextUtil.sendMessage(sender, "<yellow>/uhc border <set|shrink> <radio> [tiempo] <gray>- Controla el borde.");
+        TextUtil.sendMessage(sender, "<yellow>/uhc revive <jugador> <gray>- Revive a un jugador eliminado.");
+        TextUtil.sendMessage(sender, "<yellow>/uhc setlobby <gray>- Establece el punto de aparición del lobby.");
+        TextUtil.sendMessage(sender, "<yellow>/uhc reload <gray>- Recarga los archivos de configuración.");
+        TextUtil.sendMessage(sender, "<gold>==========================================");
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (!sender.hasPermission("yanguhc.admin") && !sender.isOp()) return Collections.emptyList();
+    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+        if (!sender.hasPermission("yanguhc.admin") && !sender.hasPermission("yanguhc.host") && !sender.isOp()) {
+            return Collections.emptyList();
+        }
 
         if (args.length == 1) {
-            return filter(Arrays.asList("start", "stop", "scenarios", "forcepvp", "border", "kit", "kits", "setlobby", "setspawn", "revive", "reload"), args[0]);
+            List<String> subs = Arrays.asList("config", "start", "stop", "scenarios", "forcepvp", "border", "kit", "kits", "setlobby", "setspawn", "revive", "reload");
+            return filter(subs, args[0]);
+        }
+
+        if (args.length == 2 && (args[0].equalsIgnoreCase("kit") || args[0].equalsIgnoreCase("kits"))) {
+            return filter(Arrays.asList("gui", "create", "edit", "delete", "setstarter", "list"), args[1]);
+        }
+
+        if (args.length == 3 && (args[0].equalsIgnoreCase("kit") || args[0].equalsIgnoreCase("kits"))) {
+            String act = args[1].toLowerCase();
+            if (act.equals("delete") || act.equals("setstarter") || act.equals("edit")) {
+                List<String> names = plugin.getKitManager().getAllKits().stream().map(Kit::getName).toList();
+                return filter(names, args[2]);
+            }
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("border")) {
             return filter(Arrays.asList("set", "shrink"), args[1]);
         }
 
-        if (args.length == 2 && (args[0].equalsIgnoreCase("kit") || args[0].equalsIgnoreCase("kits"))) {
-            return filter(Arrays.asList("enable", "disable", "toggle", "create", "edit", "preview", "delete", "list"), args[1]);
-        }
-
-        if (args.length == 3 && (args[0].equalsIgnoreCase("kit") || args[0].equalsIgnoreCase("kits"))) {
-            String sub = args[1].toLowerCase();
-            if (Arrays.asList("enable", "disable", "toggle", "edit", "preview", "delete").contains(sub)) {
-                List<String> kitNames = new ArrayList<>();
-                for (Kit k : plugin.getKitManager().getAllKits()) {
-                    kitNames.add(k.getName());
+        if (args.length == 2 && args[0].equalsIgnoreCase("revive")) {
+            List<String> names = new ArrayList<>();
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (!plugin.getGameManager().isAlive(p)) {
+                    names.add(p.getName());
                 }
-                return filter(kitNames, args[2]);
             }
+            return filter(names, args[1]);
         }
 
         return Collections.emptyList();
     }
 
-    private List<String> filter(List<String> list, String prefix) {
+    private List<String> filter(List<String> list, String query) {
         List<String> result = new ArrayList<>();
         for (String s : list) {
-            if (s.toLowerCase().startsWith(prefix.toLowerCase())) {
+            if (s.toLowerCase().startsWith(query.toLowerCase())) {
                 result.add(s);
             }
         }

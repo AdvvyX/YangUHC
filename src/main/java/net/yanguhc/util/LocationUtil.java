@@ -3,11 +3,18 @@ package net.yanguhc.util;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 
 public final class LocationUtil {
 
     private LocationUtil() {
+    }
+
+    public static boolean isBlacklistedBiome(Biome biome) {
+        if (biome == null) return false;
+        String name = biome.name().toUpperCase();
+        return name.contains("OCEAN") || name.contains("SWAMP") || name.contains("RIVER");
     }
 
     public static Location getSafeHighestLocation(World world, int x, int z) {
@@ -21,7 +28,14 @@ public final class LocationUtil {
         Block block = world.getBlockAt(x, highestY, z);
         Material type = block.getType();
 
-        if (type == Material.LAVA || type == Material.WATER || type == Material.FIRE) {
+        if (type == Material.LAVA || type == Material.WATER || type == Material.FIRE
+                || type == Material.SEAGRASS || type == Material.TALL_SEAGRASS
+                || type == Material.KELP || type == Material.KELP_PLANT) {
+            return null;
+        }
+
+        Biome biome = world.getBiome(x, highestY, z);
+        if (isBlacklistedBiome(biome)) {
             return null;
         }
 

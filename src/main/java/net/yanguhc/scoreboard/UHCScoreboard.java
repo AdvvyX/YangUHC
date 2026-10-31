@@ -1,6 +1,7 @@
 package net.yanguhc.scoreboard;
 
 import net.kyori.adventure.text.Component;
+import net.yanguhc.team.Team;
 import net.yanguhc.util.TextUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -8,7 +9,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 public class UHCScoreboard {
 
@@ -30,7 +33,7 @@ public class UHCScoreboard {
 
         for (int i = 0; i < 15; i++) {
             String entry = ChatColor.values()[i].toString() + ChatColor.RESET;
-            Team team = scoreboard.registerNewTeam("line_" + i);
+            org.bukkit.scoreboard.Team team = scoreboard.registerNewTeam("line_" + i);
             team.addEntry(entry);
         }
 
@@ -56,7 +59,7 @@ public class UHCScoreboard {
             int score = count - i;
             String entry = ChatColor.values()[i].toString() + ChatColor.RESET;
 
-            Team team = scoreboard.getTeam("line_" + i);
+            org.bukkit.scoreboard.Team team = scoreboard.getTeam("line_" + i);
             if (team != null) {
                 team.prefix(TextUtil.parse(line));
             }
@@ -66,6 +69,34 @@ public class UHCScoreboard {
                 objectiveScore.setScore(score);
             }
         }
+    }
+
+    public void updateTeams(Collection<Team> teams) {
+        for (Team team : teams) {
+            String scTeamName = "tm_" + team.getId().replace("-", "_");
+            if (scTeamName.length() > 16) {
+                scTeamName = scTeamName.substring(0, 16);
+            }
+
+            org.bukkit.scoreboard.Team scTeam = scoreboard.getTeam(scTeamName);
+            if (scTeam == null) {
+                scTeam = scoreboard.registerNewTeam(scTeamName);
+            }
+
+            String colorTag = team.getColorTag() != null ? team.getColorTag() : "<yellow>";
+            scTeam.prefix(TextUtil.parse(colorTag + "[" + team.getName() + "] "));
+
+            for (UUID memberUuid : team.getMembers()) {
+                Player member = Bukkit.getPlayer(memberUuid);
+                if (member != null && !scTeam.hasEntry(member.getName())) {
+                    scTeam.addEntry(member.getName());
+                }
+            }
+        }
+    }
+
+    public Scoreboard getScoreboard() {
+        return scoreboard;
     }
 
     public Player getPlayer() {

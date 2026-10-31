@@ -82,6 +82,15 @@ public class GameManager {
         return graceRemainingSeconds;
     }
 
+    public int getGracePeriodDuration() {
+        return gracePeriodDuration;
+    }
+
+    public void setGracePeriodDuration(int seconds) {
+        this.gracePeriodDuration = Math.max(0, seconds);
+        this.graceRemainingSeconds = this.gracePeriodDuration;
+    }
+
     public boolean startGame() {
         if (state != GameState.LOBBY) {
             return false;
@@ -91,10 +100,8 @@ public class GameManager {
             return false;
         }
 
-        if (plugin.getTeamManager().isTeamsEnabled()) {
-            plugin.getTeamManager().autoAssignSoloTeams();
-            plugin.getTeamManager().resetTeamsForNewGame();
-        }
+        plugin.getTeamManager().autoAssignTeams();
+        plugin.getTeamManager().resetTeamsForNewGame();
 
         setState(GameState.SCATTERING);
         alivePlayers.clear();
@@ -114,17 +121,30 @@ public class GameManager {
         }
 
         plugin.getWorldManager().getScatterManager().startScatter(() -> {
-            setState(GameState.GRACE_PERIOD);
-            plugin.getWorldManager().getUhcWorld().setPVP(false);
+            if (gracePeriodDuration <= 0) {
+                setState(GameState.INGAME);
+                plugin.getWorldManager().getUhcWorld().setPVP(true);
+                plugin.getKitManager().giveStarterKits();
 
-            plugin.getKitManager().giveStarterKits();
+                plugin.getMessages().broadcast("game.game-starting");
+                plugin.getMessages().broadcast("game.pvp-enabled");
 
-            plugin.getMessages().broadcast("game.game-starting");
-            plugin.getMessages().broadcast("game.grace-period-active", "minutes", (gracePeriodDuration / 60));
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 1f);
+                    plugin.getMessages().sendTitle(p, "titles.start.title", "titles.start.subtitle", 10, 60, 20);
+                }
+            } else {
+                setState(GameState.GRACE_PERIOD);
+                plugin.getWorldManager().getUhcWorld().setPVP(false);
+                plugin.getKitManager().giveStarterKits();
 
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 1f);
-                plugin.getMessages().sendTitle(p, "titles.start.title", "titles.start.subtitle", 10, 60, 20);
+                plugin.getMessages().broadcast("game.game-starting");
+                plugin.getMessages().broadcast("game.grace-period-active", "minutes", (gracePeriodDuration / 60));
+
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 1f);
+                    plugin.getMessages().sendTitle(p, "titles.start.title", "titles.start.subtitle", 10, 60, 20);
+                }
             }
 
             startMainTimer();
@@ -182,6 +202,10 @@ public class GameManager {
     }
 
     private void checkBorderSchedule(int seconds) {
+        if (!plugin.getWorldManager().getBorderController().isShrinkEnabled()) {
+            return;
+        }
+
         if (seconds == 1500) {
             plugin.getWorldManager().getBorderController().shrinkNextStage(120);
         } else if (seconds == 2400) {

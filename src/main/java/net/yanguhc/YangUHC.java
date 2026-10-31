@@ -3,11 +3,13 @@ package net.yanguhc;
 import net.yanguhc.animation.AnimationManager;
 import net.yanguhc.command.*;
 import net.yanguhc.config.Messages;
+import net.yanguhc.game.ConfigGUI;
 import net.yanguhc.game.GameManager;
 import net.yanguhc.kit.KitEditorGUI;
 import net.yanguhc.kit.KitGUI;
 import net.yanguhc.kit.KitManager;
 import net.yanguhc.kit.KitManagerGUI;
+import net.yanguhc.kit.KitSelectorGUI;
 import net.yanguhc.listener.GameListener;
 import net.yanguhc.scenario.ScenarioGUI;
 import net.yanguhc.scenario.ScenarioManager;
@@ -35,6 +37,8 @@ public class YangUHC extends JavaPlugin {
     private KitGUI kitGUI;
     private KitManagerGUI kitManagerGUI;
     private KitEditorGUI kitEditorGUI;
+    private ConfigGUI configGUI;
+    private KitSelectorGUI kitSelectorGUI;
 
     @Override
     public void onEnable() {
@@ -59,6 +63,8 @@ public class YangUHC extends JavaPlugin {
         this.kitGUI = new KitGUI(this);
         this.kitManagerGUI = new KitManagerGUI(this);
         this.kitEditorGUI = new KitEditorGUI(this);
+        this.configGUI = new ConfigGUI(this);
+        this.kitSelectorGUI = new KitSelectorGUI(this);
 
         getServer().getPluginManager().registerEvents(new GameListener(this), this);
 
@@ -152,5 +158,13 @@ public class YangUHC extends JavaPlugin {
 
     public KitEditorGUI getKitEditorGUI() {
         return kitEditorGUI;
+    }
+
+    public ConfigGUI getConfigGUI() {
+        return configGUI;
+    }
+
+    public KitSelectorGUI getKitSelectorGUI() {
+        return kitSelectorGUI;
     }
 }

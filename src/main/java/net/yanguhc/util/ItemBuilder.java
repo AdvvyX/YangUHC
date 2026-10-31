@@ -96,6 +96,24 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder glow(boolean glow) {
+        if (meta != null) {
+            try {
+                meta.setEnchantmentGlintOverride(glow);
+            } catch (Throwable ignored) {
+                if (glow) {
+                    meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+                    meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                }
+            }
+        }
+        return this;
+    }
+
+    public ItemBuilder glow() {
+        return glow(true);
+    }
+
     public ItemBuilder unbreakable(boolean unbreakable) {
         if (meta != null) {
             meta.setUnbreakable(unbreakable);

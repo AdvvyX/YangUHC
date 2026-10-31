@@ -17,6 +17,7 @@ public class BorderController {
     private double currentRadius;
     private int shrinkStageIndex = 0;
     private final List<Double> shrinkStages = new ArrayList<>();
+    private boolean shrinkEnabled = true;
 
     public BorderController(YangUHC plugin, World world) {
         this.plugin = plugin;
@@ -71,12 +72,23 @@ public class BorderController {
     }
 
     public boolean shrinkNextStage(long seconds) {
+        if (!shrinkEnabled) {
+            return false;
+        }
         if (shrinkStageIndex < shrinkStages.size()) {
             double nextRadius = shrinkStages.get(shrinkStageIndex++);
             shrinkTo(nextRadius, seconds);
             return true;
         }
         return false;
+    }
+
+    public boolean isShrinkEnabled() {
+        return shrinkEnabled;
+    }
+
+    public void setShrinkEnabled(boolean shrinkEnabled) {
+        this.shrinkEnabled = shrinkEnabled;
     }
 
     public double getCurrentRadius() {

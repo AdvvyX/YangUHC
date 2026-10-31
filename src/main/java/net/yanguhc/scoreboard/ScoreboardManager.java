@@ -1,8 +1,10 @@
 package net.yanguhc.scoreboard;
 
+import net.kyori.adventure.text.Component;
 import net.yanguhc.YangUHC;
 import net.yanguhc.game.GameState;
 import net.yanguhc.team.Team;
+import net.yanguhc.util.TextUtil;
 import net.yanguhc.util.TimeUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -132,11 +134,35 @@ public class ScoreboardManager {
     public void registerPlayer(Player player) {
         if (player == null) return;
         scoreboards.put(player.getUniqueId(), new UHCScoreboard(player));
+        updateNametags();
     }
 
     public void unregisterPlayer(Player player) {
         if (player == null) return;
         scoreboards.remove(player.getUniqueId());
+    }
+
+    public void updateNametags() {
+        for (UHCScoreboard uhcScoreboard : scoreboards.values()) {
+            uhcScoreboard.updateTeams(plugin.getTeamManager().getAllTeams());
+        }
+
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            Team team = plugin.getTeamManager().getTeam(p);
+            if (team != null) {
+                String colorTag = team.getColorTag() != null ? team.getColorTag() : "<yellow>";
+                Component displayName = TextUtil.parse(colorTag + "[" + team.getName() + "] <white>" + p.getName());
+                p.displayName(displayName);
+                p.playerListName(displayName);
+                p.customName(displayName);
+                p.setCustomNameVisible(true);
+            } else {
+                p.displayName(TextUtil.parse("<white>" + p.getName()));
+                p.playerListName(TextUtil.parse("<white>" + p.getName()));
+                p.customName(null);
+                p.setCustomNameVisible(false);
+            }
+        }
     }
 
     private void startTask() {
@@ -175,7 +201,6 @@ public class ScoreboardManager {
     }
 
     private String replacePlaceholders(String text, Player player, GameState state) {
-
         String resolved = plugin.getAnimationManager().replaceAnimations(text);
 
         String ip = config.getString("server-ip", "play.yanguhc.net");

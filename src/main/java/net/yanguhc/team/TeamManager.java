@@ -99,25 +99,73 @@ public class TeamManager {
         if (notify) {
             plugin.getMessages().send(leader, "teams.created", "team", name);
         }
+
+        if (plugin.getScoreboardManager() != null) {
+            plugin.getScoreboardManager().updateNametags();
+        }
         return team;
     }
 
-    public void autoAssignSoloTeams() {
-        if (!isTeamsEnabled()) return;
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            if (getTeam(p) == null) {
-                String teamName = "Equipo " + p.getName();
-                Team team = createTeam(p, teamName, false);
-                if (team != null) {
-                    plugin.getMessages().send(p, "teams.auto-created", "team", teamName);
+    public void autoAssignTeams() {
+        if (maxTeamSize <= 1) {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (getTeam(p) == null) {
+                    String teamName = "Equipo " + p.getName();
+                    Team team = createTeam(p, teamName, false);
+                    if (team != null) {
+                        plugin.getMessages().send(p, "teams.auto-created", "team", teamName);
+                    }
+                }
+            }
+        } else {
+            List<Player> unassigned = new ArrayList<>();
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (getTeam(p) == null) {
+                    unassigned.add(p);
+                }
+            }
+            Collections.shuffle(unassigned);
+
+            for (Team existingTeam : new ArrayList<>(teams.values())) {
+                while (existingTeam.getMembers().size() < maxTeamSize && !unassigned.isEmpty()) {
+                    Player p = unassigned.remove(0);
+                    existingTeam.addMember(p.getUniqueId());
+                    playerTeamMap.put(p.getUniqueId(), existingTeam);
+                    plugin.getMessages().send(p, "teams.auto-created", "team", existingTeam.getName());
+                }
+            }
+
+            Team currentTeam = null;
+            for (Player p : unassigned) {
+                if (currentTeam == null || currentTeam.getMembers().size() >= maxTeamSize) {
+                    String teamName = "Equipo #" + (teams.size() + 1);
+                    currentTeam = createTeam(p, teamName, false);
+                    if (currentTeam != null) {
+                        plugin.getMessages().send(p, "teams.auto-created", "team", teamName);
+                    }
+                } else {
+                    currentTeam.addMember(p.getUniqueId());
+                    playerTeamMap.put(p.getUniqueId(), currentTeam);
+                    plugin.getMessages().send(p, "teams.auto-created", "team", currentTeam.getName());
                 }
             }
         }
+
+        if (plugin.getScoreboardManager() != null) {
+            plugin.getScoreboardManager().updateNametags();
+        }
+    }
+
+    public void autoAssignSoloTeams() {
+        autoAssignTeams();
     }
 
     public void resetTeamsForNewGame() {
         for (Team team : teams.values()) {
             team.resetForNewGame();
+        }
+        if (plugin.getScoreboardManager() != null) {
+            plugin.getScoreboardManager().updateNametags();
         }
     }
 
@@ -139,6 +187,10 @@ public class TeamManager {
 
         String msg = plugin.getMessages().getFormatted("teams.joined", "player", player.getName());
         team.broadcast(msg);
+
+        if (plugin.getScoreboardManager() != null) {
+            plugin.getScoreboardManager().updateNametags();
+        }
         return true;
     }
 
@@ -164,6 +216,10 @@ public class TeamManager {
 
         if (team.getMembers().isEmpty()) {
             teams.remove(team.getId());
+        }
+
+        if (plugin.getScoreboardManager() != null) {
+            plugin.getScoreboardManager().updateNametags();
         }
         return true;
     }
@@ -248,5 +304,8 @@ public class TeamManager {
         pendingInvites.clear();
         teamChatEnabled.clear();
         teamCounter = 1;
+        if (plugin.getScoreboardManager() != null) {
+            plugin.getScoreboardManager().updateNametags();
+        }
     }
 }

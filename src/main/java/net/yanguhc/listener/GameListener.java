@@ -1,7 +1,11 @@
 package net.yanguhc.listener;
 
+import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.yanguhc.YangUHC;
 import net.yanguhc.game.GameState;
+import net.yanguhc.team.Team;
 import net.yanguhc.util.TextUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -44,6 +48,7 @@ public class GameListener implements Listener {
         GameState state = plugin.getGameManager().getState();
 
         plugin.getScoreboardManager().registerPlayer(player);
+        plugin.getScoreboardManager().updateNametags();
 
         if (state == GameState.LOBBY) {
             plugin.getGameManager().prepareLobbyPlayer(player);
@@ -65,6 +70,32 @@ public class GameListener implements Listener {
         if (plugin.getGameManager().getState().isGameActive() && plugin.getGameManager().isAlive(player)) {
             plugin.getMessages().broadcast("game.player-disconnect", "player", player.getName());
         }
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onChat(AsyncChatEvent event) {
+        Player player = event.getPlayer();
+
+        if (plugin.getTeamManager().isTeamChatActive(player)) {
+            event.setCancelled(true);
+            String plain = PlainTextComponentSerializer.plainText().serialize(event.message());
+            plugin.getTeamManager().sendTeamChatMessage(player, plain);
+            return;
+        }
+
+        Team team = plugin.getTeamManager().getTeam(player);
+        event.renderer((source, sourceDisplayName, message, viewer) -> {
+            Component prefix = Component.empty();
+            if (team != null) {
+                String colorTag = team.getColorTag() != null ? team.getColorTag() : "<yellow>";
+                prefix = TextUtil.parse(colorTag + "[" + team.getName() + "]<reset> ");
+            }
+            return Component.empty()
+                    .append(prefix)
+                    .append(sourceDisplayName)
+                    .append(TextUtil.parse("<gray>: </gray>"))
+                    .append(message);
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
