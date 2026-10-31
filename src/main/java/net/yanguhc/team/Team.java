@@ -79,6 +79,12 @@ public class Team {
         return aliveMembers.isEmpty();
     }
 
+    public void resetForNewGame() {
+        this.aliveMembers.clear();
+        this.aliveMembers.addAll(this.members);
+        this.kills = 0;
+    }
+
     public int getKills() {
         return kills;
     }

@@ -115,6 +115,12 @@ public class TeamManager {
         }
     }
 
+    public void resetTeamsForNewGame() {
+        for (Team team : teams.values()) {
+            team.resetForNewGame();
+        }
+    }
+
     public boolean joinTeam(Player player, Team team) {
         if (team == null || player == null) return false;
 
@@ -130,19 +136,23 @@ public class TeamManager {
 
         team.addMember(player.getUniqueId());
         playerTeamMap.put(player.getUniqueId(), team);
-        pendingInvites.remove(player.getUniqueId());
 
         String msg = plugin.getMessages().getFormatted("teams.joined", "player", player.getName());
         team.broadcast(msg);
         return true;
     }
 
+    public boolean areTeammates(Player p1, Player p2) {
+        if (p1 == null || p2 == null) return false;
+        Team t1 = getTeam(p1);
+        Team t2 = getTeam(p2);
+        return t1 != null && t1.equals(t2);
+    }
+
     public boolean leaveTeam(Player player) {
+        if (player == null) return false;
         Team team = getTeam(player);
-        if (team == null) {
-            TextUtil.sendMessage(player, "<red>No estás en ningún equipo.");
-            return false;
-        }
+        if (team == null) return false;
 
         team.removeMember(player.getUniqueId());
         playerTeamMap.remove(player.getUniqueId());
@@ -164,10 +174,8 @@ public class TeamManager {
             team = createTeam(leader);
         }
 
-        if (team == null) return;
-
-        if (!team.getLeader().equals(leader.getUniqueId())) {
-            TextUtil.sendMessage(leader, "<red>Solo el líder del equipo puede invitar jugadores.");
+        if (!leader.getUniqueId().equals(team.getLeader())) {
+            plugin.getMessages().send(leader, "general.no-permission");
             return;
         }
 
@@ -177,7 +185,7 @@ public class TeamManager {
         }
 
         if (getTeam(target) != null) {
-            TextUtil.sendMessage(leader, "<red>" + target.getName() + " ya está en un equipo.");
+            plugin.getMessages().send(leader, "teams.already-in");
             return;
         }
 
@@ -187,30 +195,27 @@ public class TeamManager {
     }
 
     public boolean acceptInvite(Player player) {
-        String teamId = pendingInvites.get(player.getUniqueId());
+        String teamId = pendingInvites.remove(player.getUniqueId());
         if (teamId == null) {
             plugin.getMessages().send(player, "teams.no-invite");
             return false;
         }
 
-        Team team = teams.get(teamId);
+        Team team = getTeamById(teamId);
         if (team == null) {
             plugin.getMessages().send(player, "teams.invite-expired");
-            pendingInvites.remove(player.getUniqueId());
             return false;
         }
 
         return joinTeam(player, team);
     }
 
-    public boolean areTeammates(Player p1, Player p2) {
-        if (p1 == null || p2 == null || !isTeamsEnabled()) return false;
-        Team t1 = getTeam(p1);
-        Team t2 = getTeam(p2);
-        return t1 != null && t1 == t2;
-    }
-
     public boolean toggleTeamChat(Player player) {
+        if (getTeam(player) == null) {
+            plugin.getMessages().send(player, "teams.not-in-team-chat");
+            return false;
+        }
+
         if (teamChatEnabled.contains(player.getUniqueId())) {
             teamChatEnabled.remove(player.getUniqueId());
             plugin.getMessages().send(player, "teams.chat-disabled");

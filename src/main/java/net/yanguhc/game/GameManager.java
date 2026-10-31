@@ -93,6 +93,7 @@ public class GameManager {
 
         if (plugin.getTeamManager().isTeamsEnabled()) {
             plugin.getTeamManager().autoAssignSoloTeams();
+            plugin.getTeamManager().resetTeamsForNewGame();
         }
 
         setState(GameState.SCATTERING);
@@ -229,26 +230,40 @@ public class GameManager {
     public void checkWinCondition() {
         if (!state.isGameActive()) return;
 
+        if (alivePlayers.isEmpty()) {
+            endGame(null);
+            return;
+        }
+
         if (plugin.getTeamManager().isTeamsEnabled()) {
-            List<Team> activeTeams = new ArrayList<>();
-            for (Team t : plugin.getTeamManager().getAllTeams()) {
-                if (!t.isEliminated()) {
-                    activeTeams.add(t);
+            Set<Team> livingTeams = new HashSet<>();
+            Set<UUID> soloLiving = new HashSet<>();
+
+            for (UUID uuid : alivePlayers) {
+                Team t = plugin.getTeamManager().getTeam(uuid);
+                if (t != null) {
+                    livingTeams.add(t);
+                } else {
+                    soloLiving.add(uuid);
                 }
             }
 
-            if (activeTeams.size() == 1 && alivePlayers.size() <= activeTeams.get(0).getMembers().size()) {
-                endGame(activeTeams.get(0));
-            } else if (activeTeams.isEmpty() && alivePlayers.size() <= 1) {
-                endGame(null);
+            if (livingTeams.size() == 1 && soloLiving.isEmpty()) {
+                endGame(livingTeams.iterator().next());
+                return;
+            }
+
+            if (livingTeams.isEmpty() && soloLiving.size() == 1) {
+                Player winner = Bukkit.getPlayer(soloLiving.iterator().next());
+                endGame(winner);
+                return;
             }
         } else {
             if (alivePlayers.size() == 1) {
                 UUID winnerUuid = alivePlayers.iterator().next();
                 Player winner = Bukkit.getPlayer(winnerUuid);
                 endGame(winner);
-            } else if (alivePlayers.isEmpty()) {
-                endGame(null);
+                return;
             }
         }
     }
@@ -270,6 +285,11 @@ public class GameManager {
             winnerName = team.getName();
         } else if (winnerObj instanceof Player player) {
             winnerName = player.getName();
+        } else if (winnerObj instanceof UUID uuid) {
+            Player p = Bukkit.getPlayer(uuid);
+            winnerName = p != null ? p.getName() : uuid.toString();
+        } else if (winnerObj instanceof String str) {
+            winnerName = str;
         }
 
         plugin.getMessages().broadcast("game.game-ended", "winner", winnerName);
@@ -335,6 +355,10 @@ public class GameManager {
         if (endGameTask != null) {
             endGameTask.cancel();
             endGameTask = null;
+        }
+
+        if (plugin.getTeamManager().isTeamsEnabled()) {
+            plugin.getTeamManager().resetTeamsForNewGame();
         }
 
         if (plugin.getWorldManager() != null && plugin.getWorldManager().getScatterManager() != null) {
