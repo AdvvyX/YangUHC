@@ -33,7 +33,11 @@ public class ScoreboardManager {
         this.file = new File(plugin.getDataFolder(), "scoreboard.yml");
         if (!file.exists()) {
             file.getParentFile().mkdirs();
-            createDefaultScoreboardFile();
+            if (plugin.getResource("scoreboard.yml") != null) {
+                plugin.saveResource("scoreboard.yml", false);
+            } else {
+                createDefaultScoreboardFile();
+            }
         }
         this.config = YamlConfiguration.loadConfiguration(file);
     }

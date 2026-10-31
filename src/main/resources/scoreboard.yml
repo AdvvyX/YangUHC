@@ -1,0 +1,59 @@
+title: '%animation:titleAnimation%'
+update-interval-ticks: 2
+server-ip: play.yanguhc.net
+layouts:
+  LOBBY:
+  - <gray><st>-------------------</st>
+  - '<white>Estado: <yellow>Esperando'
+  - '<white>Jugadores: <gold>{alive}<gray>/{total_players}'
+  - '<white>Equipo: <aqua>{team}'
+  - '<white>Escenarios: <green>{scenarios_count} activos'
+  - ''
+  - '%animation:glowIp%'
+  - <gray><st>-------------------</st>
+  SCATTERING:
+  - <gray><st>-------------------</st>
+  - '<white>Estado: <aqua>Teleportando'
+  - '<white>Jugadores: <gold>{alive}'
+  - ''
+  - <yellow>Preparando terreno...
+  - <gray><st>-------------------</st>
+  GRACE_PERIOD:
+  - <gray><st>-------------------</st>
+  - '<white>Tiempo: <gold>{timer}'
+  - '<white>PvP Activo en: <red>{pvp_timer}'
+  - '<white>Vivos: <green>{alive}'
+  - '<white>Borde: <aqua>±{border}'
+  - '<white>Tus Kills: <red>{kills}'
+  - '<white>Equipo: <yellow>{team}'
+  - ''
+  - '<white>Coords: <gray>{x}, {y}, {z}'
+  - '%animation:glowIp%'
+  - <gray><st>-------------------</st>
+  INGAME:
+  - <gray><st>-------------------</st>
+  - '<white>Tiempo: <gold>{timer}'
+  - '<white>Borde: <aqua>±{border}'
+  - '<white>Vivos: <green>{alive}'
+  - '<white>Kills: <red>{kills}'
+  - '<white>Equipo Kills: <gold>{team_kills}'
+  - '<white>Coords: <gray>{x}, {y}, {z}'
+  - ''
+  - '%animation:glowIp%'
+  - <gray><st>-------------------</st>
+  DEATHMATCH:
+  - <gray><st>-------------------</st>
+  - <dark_red><bold>DEATHMATCH</bold>
+  - '<white>Borde Final: <red>±{border}'
+  - '<white>Sobrevivientes: <green>{alive}'
+  - '<white>Kills: <gold>{kills}'
+  - ''
+  - '%animation:glowIp%'
+  - <gray><st>-------------------</st>
+  ENDED:
+  - <gray><st>-------------------</st>
+  - <gold><bold>¡JUEGO TERMINADO!</bold>
+  - '<white>Kills Totales: <red>{kills}'
+  - ''
+  - <yellow>¡Gracias por jugar!
+  - <gray><st>-------------------</st>
