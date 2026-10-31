@@ -15,6 +15,12 @@ general:
     - "<green>¡Bienvenido a <bold>YangUHC</bold>!"
     - "<gray>Usa <gold>/scenarios</gold> y <gold>/team</gold> para prepararte antes de iniciar."
   setlobby-success: "<green>¡Spawn del lobby establecido exitosamente en tu posición actual!"
+  game-already-started: "<red>La partida ya ha iniciado o se encuentra en curso."
+  game-not-active: "<red>No hay ninguna partida activa en este momento."
+  pvp-already-active: "<red>El PvP ya se encuentra activado en esta partida."
+  pvp-not-grace: "<red>Solo puedes forzar el PvP durante el periodo de gracia de una partida activa."
+  player-already-alive: "<yellow>{player} ya está vivo en la partida."
+  no-players-online: "<red>No hay jugadores conectados para iniciar el UHC."
 
 # Estado de la Partida
 game:

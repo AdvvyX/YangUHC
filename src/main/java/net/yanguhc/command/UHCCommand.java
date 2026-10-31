@@ -1,6 +1,7 @@
 package net.yanguhc.command;
 
 import net.yanguhc.YangUHC;
+import net.yanguhc.game.GameState;
 import net.yanguhc.kit.Kit;
 import net.yanguhc.util.TextUtil;
 import net.yanguhc.util.TimeUtil;
@@ -39,10 +40,26 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
         String sub = args[0].toLowerCase();
         switch (sub) {
             case "start" -> {
-                plugin.getGameManager().startGame();
-                TextUtil.sendMessage(sender, "<green>Iniciando proceso de scatter y partida...");
+                GameState state = plugin.getGameManager().getState();
+                if (state != GameState.LOBBY) {
+                    plugin.getMessages().send(sender, "general.game-already-started");
+                    return true;
+                }
+                if (Bukkit.getOnlinePlayers().isEmpty()) {
+                    plugin.getMessages().send(sender, "general.no-players-online");
+                    return true;
+                }
+                boolean started = plugin.getGameManager().startGame();
+                if (started) {
+                    TextUtil.sendMessage(sender, "<green>Iniciando proceso de scatter y partida...");
+                }
             }
             case "stop" -> {
+                GameState state = plugin.getGameManager().getState();
+                if (state == GameState.LOBBY) {
+                    plugin.getMessages().send(sender, "general.game-not-active");
+                    return true;
+                }
                 plugin.getGameManager().stopGame();
             }
             case "scenarios" -> {
@@ -53,6 +70,15 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
                 }
             }
             case "forcepvp" -> {
+                GameState currentState = plugin.getGameManager().getState();
+                if (currentState == GameState.INGAME || currentState == GameState.DEATHMATCH) {
+                    plugin.getMessages().send(sender, "general.pvp-already-active");
+                    return true;
+                }
+                if (currentState != GameState.GRACE_PERIOD) {
+                    plugin.getMessages().send(sender, "general.pvp-not-grace");
+                    return true;
+                }
                 plugin.getGameManager().enablePvP();
             }
             case "border" -> {
@@ -70,6 +96,10 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
                 }
             }
             case "revive" -> {
+                if (!plugin.getGameManager().getState().isGameActive()) {
+                    plugin.getMessages().send(sender, "general.game-not-active");
+                    return true;
+                }
                 if (args.length < 2) {
                     TextUtil.sendMessage(sender, "<red>Uso: /uhc revive <jugador>");
                     return true;
@@ -77,6 +107,10 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
                 Player target = Bukkit.getPlayer(args[1]);
                 if (target == null) {
                     plugin.getMessages().send(sender, "general.player-not-found");
+                    return true;
+                }
+                if (plugin.getGameManager().isAlive(target)) {
+                    plugin.getMessages().send(sender, "general.player-already-alive", "player", target.getName());
                     return true;
                 }
                 plugin.getGameManager().revivePlayer(target);
@@ -102,6 +136,10 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
         }
         String action = args[1].toLowerCase();
         if (action.equals("shrink")) {
+            if (!plugin.getGameManager().getState().isGameActive()) {
+                plugin.getMessages().send(sender, "general.game-not-active");
+                return;
+            }
             if (args.length >= 4) {
                 double radius = Double.parseDouble(args[2]);
                 long seconds = Long.parseLong(args[3]);

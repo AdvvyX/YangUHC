@@ -81,9 +81,13 @@ public class GameManager {
         return graceRemainingSeconds;
     }
 
-    public void startGame() {
+    public boolean startGame() {
         if (state != GameState.LOBBY) {
-            return;
+            return false;
+        }
+
+        if (Bukkit.getOnlinePlayers().isEmpty()) {
+            return false;
         }
 
         // Auto-assign solo teams to any players who don't have a team yet
@@ -124,6 +128,7 @@ public class GameManager {
 
             startMainTimer();
         });
+        return true;
     }
 
     private void startMainTimer() {
@@ -161,7 +166,12 @@ public class GameManager {
         }.runTaskTimer(plugin, 20L, 20L);
     }
 
-    public void enablePvP() {
+    public boolean enablePvP() {
+        if (state != GameState.GRACE_PERIOD) {
+            return false;
+        }
+
+        graceRemainingSeconds = 0;
         setState(GameState.INGAME);
         plugin.getWorldManager().getUhcWorld().setPVP(true);
 
@@ -170,6 +180,7 @@ public class GameManager {
             p.playSound(p.getLocation(), Sound.ENTITY_WITHER_SPAWN, 0.8f, 1f);
             plugin.getMessages().sendTitle(p, "titles.pvp.title", "titles.pvp.subtitle", 10, 60, 20);
         }
+        return true;
     }
 
     private void checkBorderSchedule(int seconds) {
@@ -319,10 +330,14 @@ public class GameManager {
         plugin.getKitManager().reset();
     }
 
-    public void stopGame() {
+    public boolean stopGame() {
+        if (state == GameState.LOBBY) {
+            return false;
+        }
         setState(GameState.LOBBY);
         if (mainTimerTask != null) mainTimerTask.cancel();
         resetGame();
         plugin.getMessages().broadcast("game.game-stopped");
+        return true;
     }
 }
