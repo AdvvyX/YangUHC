@@ -1,12 +1,12 @@
 # =========================================================
 #                   YANG UHC - MESSAGES
-#     Soporta MiniMessage (<green>, <gradient>, etc.) y Legacy (&a)
+#     Soporta MiniMessage (<green>, <gradient>, etc.) y Legacy (&a, &#RGB)
 #     Cualquier mensaje puede ser 1 línea o una lista multilinea (-)
 # =========================================================
 
-prefix: "<gold><bold>YangUHC</bold> <gray>»</gray> "
+prefix: "&#EFE452&lY&#F1CF3F&la&#F2B92C&ln&#F4A419&lg &#F3AB1F&lU&#F1C739&lH&#EFE452&lC <gray>»</gray> "
 
-# Mensajes Generales y de Administración
+# Mensajes
 general:
   no-permission: "<red>No tienes permisos para ejecutar este comando."
   player-not-found: "<red>Jugador no encontrado."
@@ -38,37 +38,36 @@ game:
   pvp-disabled-grace: "<red>¡El PvP está desactivado durante el periodo de gracia!"
   friendly-fire-disabled: "<red>¡El fuego amigo está desactivado!"
   
-  # Anuncio de Finalización (Multilínea totalmente configurable)
+  # Anuncio de Finalización
   game-ended:
-    - "<gold><bold>========================================"
+    - "&7&m----------------------------------------"
     - "<yellow><bold>        ¡YANG UHC HA FINALIZADO!        "
     - "<white>Ganador de la partida: <green><bold>{winner}</bold>"
-    - "<gold><bold>========================================"
+    - "&7&m----------------------------------------"
 
-# Títulos y Subtítulos en Pantalla
+# Títulos y Subtítulos
 titles:
   start:
-    title: "<green><bold>¡UHC INICIADO!</bold>"
+    title: "&#52EF76&lU&#4CEB70&lH&#45E86B&lC &#39E15F&lI&#32DD5A&ln&#2CDA54&li&#26D64E&lc&#20D348&li&#19CF43&la&#13CC3D&ld&#0DC837&lo&#06C532&l!&#00C12C&l."
     subtitle: "<yellow>Recolecta recursos y prepárate"
   pvp:
-    title: "<red><bold>¡PVP ACTIVADO!</bold>"
+    title: "<red><bold>🗡 PVP ACTIVADO 🗡</bold>"
     subtitle: "<yellow>Que gane el mejor"
   victory:
-    title: "<gold><bold>¡VICTORIA!</bold>"
-    subtitle: "<yellow>Ganador: {winner}"
+    title: "<gold><bold>🏆 VICTORIA 🏆</bold>"
+    subtitle: "<yellow>Team Ganador: {winner}"
   scatter:
     title: "<gold>¡Teleportado!"
     subtitle: "<yellow>Espera a que todos carguen sus chunks"
   eliminated:
-    title: "<red><bold>¡HAS SIDO ELIMINADO!</bold>"
+    title: "<red><bold>☠ ¡HAS SIDO ELIMINADO! ☠</bold>"
     subtitle: "<gray>Ahora estás en modo espectador"
 
-# Teletransporte Seguro (Scatter)
+# SAFE TELEPORT
 scatter:
   starting: "<gold><bold>SCATTER</bold> <gray>» <yellow>Iniciando teleportación segura para <aqua>{groups} grupos</aqua>..."
   completed: "<green><bold>¡SCATTER COMPLETADO!</bold> <gray>Todos los jugadores han sido ubicados."
 
-# Borde del Mundo
 border:
   shrinking: "<gold><bold>BORDE</bold> <gray>» <yellow>El borde se está reduciendo a <red>±{radius} bloques</red> en <aqua>{seconds}s</aqua>!"
   set: "<green>Borde establecido a ±{radius} bloques."
@@ -99,7 +98,7 @@ scenarios:
   noclean-protect: "<green>NoClean activo: Eres invulnerable durante <gold>20 segundos</gold> (se cancela si atacas a otro jugador)."
   noclean-cancelled: "<yellow>Has atacado a un jugador: tu protección NoClean ha sido desactivada."
 
-# Equipos (Teams)
+# Teams
 teams:
   created: "<green>Has creado el equipo <bold>{team}</bold> exitosamente."
   auto-created: "<yellow><bold>TEAMS</bold> <gray>» <green>Se te ha asignado automáticamente el <bold>{team}</bold> para la partida."
