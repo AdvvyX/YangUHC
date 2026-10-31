@@ -23,7 +23,7 @@ public class GameManager {
     private final Map<UUID, Integer> killsMap = new ConcurrentHashMap<>();
 
     private int gameTimeSeconds = 0;
-    private int gracePeriodDuration = 1200; // 20 minutes default (1200s)
+    private int gracePeriodDuration = 1200;
     private int graceRemainingSeconds = 1200;
     private BukkitTask mainTimerTask;
 
@@ -90,7 +90,6 @@ public class GameManager {
             return false;
         }
 
-        // Auto-assign solo teams to any players who don't have a team yet
         if (plugin.getTeamManager().isTeamsEnabled()) {
             plugin.getTeamManager().autoAssignSoloTeams();
         }
@@ -115,7 +114,6 @@ public class GameManager {
             setState(GameState.GRACE_PERIOD);
             plugin.getWorldManager().getUhcWorld().setPVP(false);
 
-            // Give kits
             plugin.getKitManager().giveStarterKits();
 
             plugin.getMessages().broadcast("game.game-starting");
@@ -144,7 +142,6 @@ public class GameManager {
 
                 gameTimeSeconds++;
 
-                // Handle Grace Period
                 if (state == GameState.GRACE_PERIOD) {
                     graceRemainingSeconds--;
                     if (graceRemainingSeconds <= 0) {
@@ -157,10 +154,8 @@ public class GameManager {
                     }
                 }
 
-                // Check border shrink schedule
                 checkBorderSchedule(gameTimeSeconds);
 
-                // Check win condition
                 checkWinCondition();
             }
         }.runTaskTimer(plugin, 20L, 20L);
@@ -184,15 +179,14 @@ public class GameManager {
     }
 
     private void checkBorderSchedule(int seconds) {
-        // Border shrink triggers configurable
-        // Shrink stage 1 at 25 min (1500s)
+
         if (seconds == 1500) {
             plugin.getWorldManager().getBorderController().shrinkNextStage(120);
-        } else if (seconds == 2400) { // 40 min
+        } else if (seconds == 2400) {
             plugin.getWorldManager().getBorderController().shrinkNextStage(120);
-        } else if (seconds == 3300) { // 55 min
+        } else if (seconds == 3300) {
             plugin.getWorldManager().getBorderController().shrinkNextStage(120);
-        } else if (seconds == 4200) { // 70 min
+        } else if (seconds == 4200) {
             setState(GameState.DEATHMATCH);
             plugin.getWorldManager().getBorderController().shrinkNextStage(60);
             plugin.getMessages().broadcast("game.deathmatch-started");
@@ -270,7 +264,6 @@ public class GameManager {
             winnerName = player.getName();
         }
 
-        // Broadcast multiline game-ended announcement
         plugin.getMessages().broadcast("game.game-ended", "winner", winnerName);
 
         for (Player p : Bukkit.getOnlinePlayers()) {

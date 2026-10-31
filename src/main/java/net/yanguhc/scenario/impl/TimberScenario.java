@@ -33,7 +33,7 @@ public class TimberScenario extends Scenario {
         if (!Tag.LOGS.isTagged(root.getType())) return;
 
         Player player = event.getPlayer();
-        if (player.isSneaking()) return; // Allow sneaking to chop single block
+        if (player.isSneaking()) return;
 
         Material axe = player.getInventory().getItemInMainHand().getType();
         if (!axe.name().endsWith("_AXE")) return;

@@ -28,14 +28,12 @@ public class KitGUI implements Listener, InventoryHolder {
 
         Inventory inv = Bukkit.createInventory(this, 54, TextUtil.parse("<gold>Kit Preview: " + kit.getName()));
 
-        // Display Armor in top row
         inv.setItem(0, kit.getHelmet());
         inv.setItem(1, kit.getChestplate());
         inv.setItem(2, kit.getLeggings());
         inv.setItem(3, kit.getBoots());
         inv.setItem(4, kit.getOffHand());
 
-        // Info item in slot 8
         ItemStack info = new ItemBuilder(Material.PAPER)
                 .name("<yellow><bold>Información del Kit</bold>")
                 .lore(
@@ -45,13 +43,11 @@ public class KitGUI implements Listener, InventoryHolder {
                 .build();
         inv.setItem(8, info);
 
-        // Separator
         ItemStack sep = new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE).name(" ").build();
         for (int i = 9; i < 18; i++) {
             inv.setItem(i, sep);
         }
 
-        // Contents
         int slot = 18;
         for (ItemStack item : kit.getItems()) {
             if (slot >= 54) break;

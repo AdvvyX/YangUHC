@@ -20,14 +20,12 @@ public final class TextUtil {
     private static final LegacyComponentSerializer SECTION_SERIALIZER = LegacyComponentSerializer.legacySection();
     private static final LegacyComponentSerializer AMPERSAND_SERIALIZER = LegacyComponentSerializer.legacyAmpersand();
 
-    // Regex patterns for hex RGB formats
     private static final Pattern HEX_AMP_6 = Pattern.compile("&#([a-fA-F0-9]{6})");
     private static final Pattern HEX_BRACKET_6 = Pattern.compile("\\{#([a-fA-F0-9]{6})\\}");
     private static final Pattern HEX_BARE_6 = Pattern.compile("(?<![<:;#&])#([a-fA-F0-9]{6})");
     private static final Pattern HEX_AMP_3 = Pattern.compile("&#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])(?![a-fA-F0-9])");
     private static final Pattern HEX_BARE_3 = Pattern.compile("(?<![<:;#&])#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])(?![a-fA-F0-9])");
 
-    // Legacy ampersand codes pattern (&0-9, &a-f, &k-o, &r)
     private static final Pattern LEGACY_PATTERN = Pattern.compile("&([0-9a-fk-orA-FK-OR])");
 
     private TextUtil() {
@@ -54,22 +52,16 @@ public final class TextUtil {
 
         String s = input.replace('§', '&');
 
-        // 1. Convert &#RRGGBB -> <#RRGGBB>
         s = HEX_AMP_6.matcher(s).replaceAll("<#$1>");
 
-        // 2. Convert {#RRGGBB} -> <#RRGGBB>
         s = HEX_BRACKET_6.matcher(s).replaceAll("<#$1>");
 
-        // 3. Convert bare #RRGGBB -> <#RRGGBB> (when not inside tags like <#RRGGBB> or <gradient:...>)
         s = HEX_BARE_6.matcher(s).replaceAll("<#$1>");
 
-        // 4. Convert 3-digit shorthand &#RGB -> <#RRGGBB>
         s = HEX_AMP_3.matcher(s).replaceAll("<#$1$1$2$2$3$3>");
 
-        // 5. Convert 3-digit shorthand #RGB -> <#RRGGBB>
         s = HEX_BARE_3.matcher(s).replaceAll("<#$1$1$2$2$3$3>");
 
-        // 6. Convert legacy & codes to MiniMessage tags
         Matcher matcher = LEGACY_PATTERN.matcher(s);
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {

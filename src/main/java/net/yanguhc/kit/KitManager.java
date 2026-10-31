@@ -46,7 +46,6 @@ public class KitManager {
         YamlConfiguration initial = new YamlConfiguration();
         initial.set("starter-kit", "starter");
 
-        // Default Starter Kit: Leather armor, stone tools, food, 3 feathers, 3 string
         initial.set("kits.starter.enabled", true);
         initial.set("kits.starter.delay-seconds", 0);
         initial.set("kits.starter.helmet", new ItemBuilder(Material.LEATHER_HELMET).unbreakable(true).build());
@@ -65,7 +64,6 @@ public class KitManager {
         );
         initial.set("kits.starter.items", items);
 
-        // Delayed Kit example: "food_drop" delivered at 10 minutes (600s)
         initial.set("kits.food_drop.enabled", true);
         initial.set("kits.food_drop.delay-seconds", 600);
         initial.set("kits.food_drop.items", Arrays.asList(
@@ -237,7 +235,6 @@ public class KitManager {
             }
         }
 
-        // Apply immediate enabled kits at match start
         if (!enabledImmediateKits.isEmpty()) {
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (plugin.getGameManager().isAlive(p)) {
@@ -250,7 +247,6 @@ public class KitManager {
             plugin.getMessages().broadcast("kits.delivered-broadcast");
         }
 
-        // Schedule delayed enabled kits
         for (Kit kit : enabledDelayedKits) {
             int kitDelay = kit.getDelaySeconds();
             plugin.getMessages().broadcast("kits.delayed-warning", "kit", kit.getName(), "seconds", kitDelay);

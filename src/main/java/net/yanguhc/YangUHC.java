@@ -40,14 +40,11 @@ public class YangUHC extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        // Save default configuration
         saveDefaultConfig();
 
-        // Initialize Messages & Animations
         this.messages = new Messages(this);
         this.animationManager = new AnimationManager(this);
 
-        // Initialize Managers
         this.worldManager = new WorldManager(this);
         this.worldManager.init();
 
@@ -57,17 +54,14 @@ public class YangUHC extends JavaPlugin {
         this.gameManager = new GameManager(this);
         this.scoreboardManager = new ScoreboardManager(this);
 
-        // Initialize GUIs
         this.scenarioGUI = new ScenarioGUI(this);
         this.teamGUI = new TeamGUI(this);
         this.kitGUI = new KitGUI(this);
         this.kitManagerGUI = new KitManagerGUI(this);
         this.kitEditorGUI = new KitEditorGUI(this);
 
-        // Register Listeners
         getServer().getPluginManager().registerEvents(new GameListener(this), this);
 
-        // Register Commands
         if (getCommand("uhc") != null) {
             UHCCommand uhcCmd = new UHCCommand(this);
             getCommand("uhc").setExecutor(uhcCmd);

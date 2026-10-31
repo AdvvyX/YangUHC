@@ -33,7 +33,7 @@ public class SoupScenario extends Scenario {
 
             if (player.getHealth() < max) {
                 event.setCancelled(true);
-                double healed = Math.min(max, player.getHealth() + 7.0); // 3.5 hearts
+                double healed = Math.min(max, player.getHealth() + 7.0);
                 player.setHealth(healed);
 
                 if (event.getHand() != null) {

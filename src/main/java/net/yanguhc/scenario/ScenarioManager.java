@@ -63,7 +63,7 @@ public class ScenarioManager {
 
     private void createDefaultConfig() {
         YamlConfiguration initial = new YamlConfiguration();
-        // CutClean, Timber, and GoldenRetriever enabled by default
+
         initial.set("enabled-scenarios", Arrays.asList("cutclean", "timber", "goldenretriever"));
         try {
             initial.save(file);

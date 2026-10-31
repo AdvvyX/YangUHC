@@ -16,7 +16,7 @@ public class TeamManager {
     private final Map<UUID, String> pendingInvites = new ConcurrentHashMap<>();
     private final Set<UUID> teamChatEnabled = new HashSet<>();
 
-    private int maxTeamSize = 2; // Default To2
+    private int maxTeamSize = 2;
     private boolean friendlyFire = false;
     private int teamCounter = 1;
 
@@ -152,7 +152,6 @@ public class TeamManager {
         String msg = plugin.getMessages().getFormatted("teams.left-broadcast", "player", player.getName());
         team.broadcast(msg);
 
-        // Delete team if empty
         if (team.getMembers().isEmpty()) {
             teams.remove(team.getId());
         }

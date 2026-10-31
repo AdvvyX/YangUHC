@@ -39,7 +39,6 @@ public class AnimationManager {
 
         this.config = YamlConfiguration.loadConfiguration(file);
 
-        // Check defaults from jar
         InputStream defStream = plugin.getResource("animations.yml");
         if (defStream != null) {
             YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defStream, StandardCharsets.UTF_8));

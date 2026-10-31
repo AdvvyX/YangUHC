@@ -32,14 +32,14 @@ public class TeamGUI implements Listener, InventoryHolder {
         Team team = plugin.getTeamManager().getTeam(player);
 
         if (team == null) {
-            // Not in a team: Option to Create Team
+
             ItemStack create = new ItemBuilder(Material.EMERALD_BLOCK)
                     .name("<green><bold>Crear Equipo</bold>")
                     .lore("<gray>Haz click para formar tu propio equipo.", "<yellow>Capacidad: " + plugin.getTeamManager().getMaxTeamSize() + " jugadores.")
                     .build();
             inv.setItem(13, create);
         } else {
-            // In a team: Show members & leave button
+
             int slot = 10;
             for (UUID uuid : team.getMembers()) {
                 Player member = Bukkit.getPlayer(uuid);
@@ -60,7 +60,6 @@ public class TeamGUI implements Listener, InventoryHolder {
             inv.setItem(31, leave);
         }
 
-        // Fillers
         ItemStack filler = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).name(" ").build();
         for (int i = 0; i < 36; i++) {
             if (inv.getItem(i) == null) {

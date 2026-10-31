@@ -36,7 +36,6 @@ public class Messages {
         }
         this.config = YamlConfiguration.loadConfiguration(file);
 
-        // Merge defaults if new keys exist
         InputStream defStream = plugin.getResource("messages.yml");
         if (defStream != null) {
             YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defStream, StandardCharsets.UTF_8));

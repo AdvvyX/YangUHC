@@ -18,15 +18,13 @@ public final class LocationUtil {
             highestY = 64;
         }
 
-        // Check if top block is liquid or dangerous
         Block block = world.getBlockAt(x, highestY, z);
         Material type = block.getType();
 
         if (type == Material.LAVA || type == Material.WATER || type == Material.FIRE) {
-            return null; // not safe
+            return null;
         }
 
-        // Return location centered at block
         return new Location(world, x + 0.5, highestY + 1.0, z + 0.5);
     }
 

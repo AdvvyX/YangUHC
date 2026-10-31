@@ -105,7 +105,6 @@ public class KitManagerGUI implements Listener, InventoryHolder {
             if (slot >= 44) break;
         }
 
-        // Fillers
         ItemStack filler = new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE).name(" ").build();
         for (int i = 0; i < 54; i++) {
             if (inventory.getItem(i) == null) {
@@ -113,7 +112,6 @@ public class KitManagerGUI implements Listener, InventoryHolder {
             }
         }
 
-        // Action Buttons in bottom row
         ItemStack disableAllBtn = new ItemBuilder(Material.REDSTONE_BLOCK)
                 .name("<red><bold>✖ Desactivar Todos los Kits</bold>")
                 .lore(
@@ -186,7 +184,6 @@ public class KitManagerGUI implements Listener, InventoryHolder {
             return;
         }
 
-        // Action: Desactivar todos los kits
         if (event.getSlot() == 45 && clicked.getType() == Material.REDSTONE_BLOCK) {
             plugin.getKitManager().setAllKitsEnabled(false);
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.8f);
@@ -195,7 +192,6 @@ public class KitManagerGUI implements Listener, InventoryHolder {
             return;
         }
 
-        // Action: Activar todos los kits
         if (event.getSlot() == 46 && clicked.getType() == Material.EMERALD_BLOCK) {
             plugin.getKitManager().setAllKitsEnabled(true);
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.2f);
@@ -204,7 +200,6 @@ public class KitManagerGUI implements Listener, InventoryHolder {
             return;
         }
 
-        // Action: Crear Nuevo Kit
         if (event.getSlot() == 49 && clicked.getType() == Material.EMERALD) {
             String newKitName = "kit_" + (plugin.getKitManager().getAllKits().size() + 1);
             plugin.getKitManager().createKitFromPlayer(newKitName, player, 0);
@@ -213,7 +208,6 @@ public class KitManagerGUI implements Listener, InventoryHolder {
             return;
         }
 
-        // Click on a Kit Item
         if (clicked.hasItemMeta()) {
             String kitId = clicked.getItemMeta().getPersistentDataContainer().get(kitKey, PersistentDataType.STRING);
             if (kitId != null) {
@@ -221,19 +215,19 @@ public class KitManagerGUI implements Listener, InventoryHolder {
                 if (kit == null) return;
 
                 if (event.getClick() == ClickType.SHIFT_RIGHT) {
-                    // Delete Kit
+
                     plugin.getKitManager().deleteKit(kit.getName());
                     plugin.getMessages().send(player, "kits.deleted", "kit", kit.getName());
                     player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1f, 1f);
                     refresh();
                 } else if (event.getClick() == ClickType.MIDDLE || event.getClick() == ClickType.SHIFT_LEFT) {
-                    // Preview Kit
+
                     plugin.getKitGUI().openPreview(player, kit);
                 } else if (event.isRightClick()) {
-                    // Open Kit Interactive Editor
+
                     plugin.getKitEditorGUI().open(player, kit);
                 } else if (event.isLeftClick()) {
-                    // Toggle Enabled / Disabled
+
                     boolean newState = !kit.isEnabled();
                     kit.setEnabled(newState);
                     plugin.getKitManager().saveKit(kit);

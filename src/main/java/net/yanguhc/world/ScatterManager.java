@@ -40,7 +40,6 @@ public class ScatterManager {
 
         double radius = worldManager.getBorderController().getCurrentRadius() * 0.85;
 
-        // Group players: by team if teams enabled, or solo
         List<List<Player>> groups = new ArrayList<>();
         Set<UUID> processed = new HashSet<>();
 
@@ -60,7 +59,6 @@ public class ScatterManager {
             }
         }
 
-        // Add remaining solo players
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (!processed.contains(p.getUniqueId())) {
                 groups.add(Collections.singletonList(p));
@@ -96,14 +94,14 @@ public class ScatterManager {
 
                 for (Player player : group) {
                     player.teleport(loc);
-                    // Freeze / resistance during scatter
+
                     player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 30, 255, false, false));
                     player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 3, 1, false, false));
                     player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
                     plugin.getMessages().sendTitle(player, "titles.scatter.title", "titles.scatter.subtitle", 10, 40, 10);
                 }
             }
-        }.runTaskTimer(plugin, 5L, 10L); // 2 groups per second to maintain high TPS
+        }.runTaskTimer(plugin, 5L, 10L);
     }
 
     private Location findSafeLocation(World world, int radius) {
@@ -119,7 +117,6 @@ public class ScatterManager {
             }
         }
 
-        // Fallback: spawn with safe glass platform underneath
         int x = random.nextInt(radius * 2) - radius;
         int z = random.nextInt(radius * 2) - radius;
         int y = Math.max(70, world.getHighestBlockYAt(x, z));

@@ -49,7 +49,7 @@ public class GameListener implements Listener {
             plugin.getGameManager().prepareLobbyPlayer(player);
             plugin.getMessages().send(player, "general.welcome");
         } else {
-            // Reconnect logic or spectator
+
             if (!plugin.getGameManager().isAlive(player)) {
                 plugin.getGameManager().setSpectator(player);
                 player.teleport(plugin.getWorldManager().getUhcWorld().getSpawnLocation());
@@ -84,12 +84,10 @@ public class GameListener implements Listener {
                 event.deathMessage(TextUtil.parse("<red>" + player.getName() + " <gray>ha muerto!"));
             }
 
-            // Cosmetic lightning bolt effect at death position
             if (deathLoc.getWorld() != null) {
                 deathLoc.getWorld().strikeLightningEffect(deathLoc);
             }
 
-            // Immediate auto-respawn and smooth spectator transition
             Bukkit.getScheduler().runTask(plugin, () -> {
                 if (!player.isOnline()) return;
 
@@ -100,14 +98,12 @@ public class GameListener implements Listener {
 
                 plugin.getGameManager().setSpectator(player);
 
-                // Elevate slightly so they don't clip through blocks or fall in the void
                 Location specLoc = deathLoc.clone().add(0, 1.2, 0);
                 if (specLoc.getY() < 10) {
                     specLoc.setY(64);
                 }
                 player.teleport(specLoc);
 
-                // Aesthetic backward impulse (away from killer or facing direction)
                 Vector impulse;
                 if (killer != null && killer.isOnline() && killer != player) {
                     Vector diff = deathLoc.toVector().subtract(killer.getLocation().toVector()).setY(0);
@@ -162,7 +158,6 @@ public class GameListener implements Listener {
             return;
         }
 
-        // Disable PvP during grace period
         if (event instanceof EntityDamageByEntityEvent byEntity) {
             Player attacker = null;
             if (byEntity.getDamager() instanceof Player p) {
@@ -178,7 +173,6 @@ public class GameListener implements Listener {
                     return;
                 }
 
-                // Friendly Fire check
                 if (!plugin.getTeamManager().isFriendlyFire() && plugin.getTeamManager().areTeammates(attacker, player)) {
                     event.setCancelled(true);
                     plugin.getMessages().send(attacker, "game.friendly-fire-disabled");
@@ -208,7 +202,7 @@ public class GameListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onRegen(EntityRegainHealthEvent event) {
         if (event.getEntity() instanceof Player && event.getRegainReason() == EntityRegainHealthEvent.RegainReason.SATIATED) {
-            // Natural regeneration strictly disabled in UHC
+
             event.setCancelled(true);
         }
     }

@@ -84,7 +84,6 @@ public class ScenarioGUI implements Listener, InventoryHolder {
             if (slot >= 44) break;
         }
 
-        // Fillers
         ItemStack filler = new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE).name(" ").build();
         for (int i = 0; i < 54; i++) {
             if (inventory.getItem(i) == null) {
@@ -92,7 +91,6 @@ public class ScenarioGUI implements Listener, InventoryHolder {
             }
         }
 
-        // Summary item in slot 49
         ItemStack summary = new ItemBuilder(Material.NETHER_STAR)
                 .name("<gold><bold>Resumen de Escenarios</bold>")
                 .lore(

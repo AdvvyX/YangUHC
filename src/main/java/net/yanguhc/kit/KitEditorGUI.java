@@ -33,14 +33,12 @@ public class KitEditorGUI implements Listener {
         editingSessions.put(player.getUniqueId(), kit);
         Inventory inv = Bukkit.createInventory(new KitEditHolder(kit), 54, TextUtil.parse("<dark_purple><bold>Editando:</bold> <yellow>" + kit.getName()));
 
-        // Set Armor in top row
         inv.setItem(0, kit.getHelmet());
         inv.setItem(1, kit.getChestplate());
         inv.setItem(2, kit.getLeggings());
         inv.setItem(3, kit.getBoots());
         inv.setItem(4, kit.getOffHand());
 
-        // Controls
         ItemStack delayBtn = new ItemBuilder(Material.CLOCK)
                 .name("<gold><bold>⏱ Demora de Entrega: <yellow>" + kit.getDelaySeconds() + "s")
                 .lore(
@@ -67,13 +65,11 @@ public class KitEditorGUI implements Listener {
                 .build();
         inv.setItem(8, backBtn);
 
-        // Separator
         ItemStack sep = new ItemBuilder(Material.PURPLE_STAINED_GLASS_PANE).name(" ").build();
         for (int i = 9; i < 18; i++) {
             inv.setItem(i, sep);
         }
 
-        // Fill contents
         int slot = 18;
         for (ItemStack item : kit.getItems()) {
             if (slot >= 54) break;
@@ -91,13 +87,11 @@ public class KitEditorGUI implements Listener {
 
         int rawSlot = event.getRawSlot();
 
-        // Prevent clicking separator
         if (rawSlot >= 9 && rawSlot <= 17) {
             event.setCancelled(true);
             return;
         }
 
-        // Click Back
         if (rawSlot == 8) {
             event.setCancelled(true);
             saveKitFromInventory(player, event.getInventory(), holder.getKit());
@@ -105,7 +99,6 @@ public class KitEditorGUI implements Listener {
             return;
         }
 
-        // Click Save
         if (rawSlot == 7) {
             event.setCancelled(true);
             saveKitFromInventory(player, event.getInventory(), holder.getKit());
@@ -114,7 +107,6 @@ public class KitEditorGUI implements Listener {
             return;
         }
 
-        // Click Delay toggle
         if (rawSlot == 6) {
             event.setCancelled(true);
             Kit kit = holder.getKit();
@@ -152,14 +144,12 @@ public class KitEditorGUI implements Listener {
     private void saveKitFromInventory(Player player, Inventory inv, Kit kit) {
         if (kit == null) return;
 
-        // Armor in slots 0-3
         kit.setHelmet(cleanItem(inv.getItem(0)));
         kit.setChestplate(cleanItem(inv.getItem(1)));
         kit.setLeggings(cleanItem(inv.getItem(2)));
         kit.setBoots(cleanItem(inv.getItem(3)));
         kit.setOffHand(cleanItem(inv.getItem(4)));
 
-        // Items in slots 18-53
         List<ItemStack> items = new ArrayList<>();
         for (int i = 18; i < 54; i++) {
             ItemStack item = inv.getItem(i);

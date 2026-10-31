@@ -23,13 +23,11 @@ public class UHCScoreboard {
         this.objective = scoreboard.registerNewObjective("yanguhc", Criteria.DUMMY, Component.empty());
         this.objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-        // Hide red numbers on modern Paper 1.21+ if supported
         try {
             this.objective.numberFormat(io.papermc.paper.scoreboard.numbers.NumberFormat.blank());
         } catch (Throwable ignored) {
         }
 
-        // Pre-create 15 team lines
         for (int i = 0; i < 15; i++) {
             String entry = ChatColor.values()[i].toString() + ChatColor.RESET;
             Team team = scoreboard.registerNewTeam("line_" + i);
@@ -46,10 +44,8 @@ public class UHCScoreboard {
     public void updateLines(List<String> lines) {
         if (lines == null) lines = new ArrayList<>();
 
-        // Scoreboard can display max 15 lines
         int count = Math.min(lines.size(), 15);
 
-        // If line count decreased, unregister unused scores
         for (int i = count; i < 15; i++) {
             String entry = ChatColor.values()[i].toString() + ChatColor.RESET;
             scoreboard.resetScores(entry);

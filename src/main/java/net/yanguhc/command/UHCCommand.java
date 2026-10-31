@@ -155,7 +155,7 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
     }
 
     private void handleKit(CommandSender sender, String[] args) {
-        // If /uhc kit or /uhc kits without args: open the interactive GUI
+
         if (args.length < 2) {
             if (sender instanceof Player p) {
                 plugin.getKitManagerGUI().open(p);

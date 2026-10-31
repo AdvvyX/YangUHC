@@ -45,7 +45,7 @@ public class ScoreboardManager {
     private void createDefaultScoreboardFile() {
         YamlConfiguration c = new YamlConfiguration();
         c.set("title", "%animation:titleAnimation%");
-        c.set("update-interval-ticks", 2); // 2 ticks = 100ms for smooth animations
+        c.set("update-interval-ticks", 2);
         c.set("server-ip", "play.yanguhc.net");
 
         c.set("layouts.LOBBY", Arrays.asList(
@@ -175,7 +175,7 @@ public class ScoreboardManager {
     }
 
     private String replacePlaceholders(String text, Player player, GameState state) {
-        // Resolve text animations first
+
         String resolved = plugin.getAnimationManager().replaceAnimations(text);
 
         String ip = config.getString("server-ip", "play.yanguhc.net");
