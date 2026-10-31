@@ -39,26 +39,24 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
 
         String sub = args[0].toLowerCase();
         switch (sub) {
-            case "config" -> {
-                if (sender instanceof Player p) {
-                    plugin.getConfigGUI().open(p);
+            case "start", "config" -> {
+                boolean instant = args.length >= 2 && (args[1].equalsIgnoreCase("now") || args[1].equalsIgnoreCase("force") || args[1].equalsIgnoreCase("instant"));
+                if (instant || !(sender instanceof Player p)) {
+                    GameState state = plugin.getGameManager().getState();
+                    if (state != GameState.LOBBY) {
+                        plugin.getMessages().send(sender, "general.game-already-started");
+                        return true;
+                    }
+                    if (Bukkit.getOnlinePlayers().isEmpty()) {
+                        plugin.getMessages().send(sender, "general.no-players-online");
+                        return true;
+                    }
+                    boolean started = plugin.getGameManager().startGame();
+                    if (started) {
+                        TextUtil.sendMessage(sender, "<green>Iniciando proceso de scatter y partida...");
+                    }
                 } else {
-                    TextUtil.sendMessage(sender, "<red>Solo jugadores pueden abrir el menú de configuración.");
-                }
-            }
-            case "start" -> {
-                GameState state = plugin.getGameManager().getState();
-                if (state != GameState.LOBBY) {
-                    plugin.getMessages().send(sender, "general.game-already-started");
-                    return true;
-                }
-                if (Bukkit.getOnlinePlayers().isEmpty()) {
-                    plugin.getMessages().send(sender, "general.no-players-online");
-                    return true;
-                }
-                boolean started = plugin.getGameManager().startGame();
-                if (started) {
-                    TextUtil.sendMessage(sender, "<green>Iniciando proceso de scatter y partida...");
+                    plugin.getConfigGUI().open(p);
                 }
             }
             case "stop" -> {
@@ -289,9 +287,8 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
 
     private void sendHelp(CommandSender sender) {
         TextUtil.sendMessage(sender, "<gold><bold>=== YangUHC Comandos de Administración ===");
-        TextUtil.sendMessage(sender, "<yellow>/uhc config <gray>- Configuración interactiva previa (Borde, Kits, PvP, Teams).");
+        TextUtil.sendMessage(sender, "<yellow>/uhc start [now] <gray>- Menú de inicio y configuración (Borde, Kits, PvP, Teams).");
         TextUtil.sendMessage(sender, "<yellow>/uhc teamsize <número> <gray>- Configura el tamaño de los equipos.");
-        TextUtil.sendMessage(sender, "<yellow>/uhc start <gray>- Inicia la partida UHC.");
         TextUtil.sendMessage(sender, "<yellow>/uhc stop <gray>- Detiene la partida actual.");
         TextUtil.sendMessage(sender, "<yellow>/uhc forcepvp <gray>- Activa el PvP inmediatamente.");
         TextUtil.sendMessage(sender, "<yellow>/uhc scenarios <gray>- Abre el menú de escenarios.");
@@ -310,8 +307,12 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 1) {
-            List<String> subs = Arrays.asList("config", "teamsize", "start", "stop", "scenarios", "forcepvp", "border", "kit", "kits", "setlobby", "setspawn", "revive", "reload");
+            List<String> subs = Arrays.asList("start", "teamsize", "stop", "scenarios", "forcepvp", "border", "kit", "kits", "setlobby", "setspawn", "revive", "reload");
             return filter(subs, args[0]);
+        }
+
+        if (args.length == 2 && args[0].equalsIgnoreCase("start")) {
+            return filter(Collections.singletonList("now"), args[1]);
         }
 
         if (args.length == 2 && (args[0].equalsIgnoreCase("kit") || args[0].equalsIgnoreCase("kits"))) {

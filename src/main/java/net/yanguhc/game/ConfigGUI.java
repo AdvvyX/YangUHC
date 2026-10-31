@@ -29,7 +29,7 @@ public class ConfigGUI implements Listener, InventoryHolder {
 
     public ConfigGUI(YangUHC plugin) {
         this.plugin = plugin;
-        this.inventory = Bukkit.createInventory(this, 27, TextUtil.parse("<gold><bold>Configuración de UHC</bold>"));
+        this.inventory = Bukkit.createInventory(this, 27, TextUtil.parse("<gold><bold>Iniciar Partida UHC</bold>"));
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
@@ -109,12 +109,12 @@ public class ConfigGUI implements Listener, InventoryHolder {
         inventory.setItem(16, teamItem);
 
         ItemStack startItem = new ItemBuilder(Material.EMERALD_BLOCK)
-                .name("<green><bold>¡Iniciar Partida UHC!</bold>")
+                .name("<green><bold>¡Comenzar UHC Ahora!</bold>")
                 .lore(
-                        "<gray>Haz clic aquí para iniciar el UHC con",
+                        "<gray>Haz clic aquí para iniciar la partida con",
                         "<gray>las configuraciones seleccionadas arriba.",
                         "",
-                        "<green>▶ Clic para iniciar UHC"
+                        "<green>▶ Clic para iniciar partida"
                 )
                 .build();
         inventory.setItem(22, startItem);
