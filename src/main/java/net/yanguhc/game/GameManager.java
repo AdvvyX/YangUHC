@@ -312,6 +312,10 @@ public class GameManager {
         gameTimeSeconds = 0;
         graceRemainingSeconds = gracePeriodDuration;
 
+        if (plugin.getWorldManager() != null && plugin.getWorldManager().getScatterManager() != null) {
+            plugin.getWorldManager().getScatterManager().cleanupCages();
+        }
+
         for (Player p : Bukkit.getOnlinePlayers()) {
             prepareLobbyPlayer(p);
         }

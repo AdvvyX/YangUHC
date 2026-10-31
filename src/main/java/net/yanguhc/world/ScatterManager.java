@@ -1,5 +1,6 @@
 package net.yanguhc.world;
 
+import net.kyori.adventure.title.Title;
 import net.yanguhc.YangUHC;
 import net.yanguhc.team.Team;
 import net.yanguhc.util.LocationUtil;
@@ -10,11 +11,14 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,6 +29,8 @@ public class ScatterManager {
     private final WorldManager worldManager;
     private final Random random = new Random();
     private boolean scattering = false;
+    private final Map<Block, Material> originalBlockState = new HashMap<>();
+    private BukkitTask countdownTask;
 
     public ScatterManager(YangUHC plugin, WorldManager worldManager) {
         this.plugin = plugin;
@@ -34,6 +40,7 @@ public class ScatterManager {
     public void startScatter(Runnable onComplete) {
         if (scattering) return;
         scattering = true;
+        cleanupCages();
 
         World world = worldManager.getUhcWorld();
         if (world == null) {
@@ -138,11 +145,7 @@ public class ScatterManager {
             public void run() {
                 if (index >= groups.size()) {
                     cancel();
-                    scattering = false;
-                    plugin.getMessages().broadcast("scatter.completed");
-                    if (onComplete != null) {
-                        onComplete.run();
-                    }
+                    startCountdown(onComplete);
                     return;
                 }
 
@@ -154,20 +157,112 @@ public class ScatterManager {
                 if (loc == null || !LocationUtil.isSafeLocation(loc)) {
                     int y = Math.max(70, world.getHighestBlockYAt(point[0], point[1]));
                     loc = new Location(world, point[0] + 0.5, y + 1.0, point[1] + 0.5);
-                    loc.getBlock().getRelative(0, -1, 0).setType(Material.GLASS);
                 }
+
+                createCage(loc);
 
                 for (Player player : group) {
                     player.teleportAsync(loc).thenAccept(success -> {
                         if (!player.isOnline()) return;
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 30, 255, false, false));
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 3, 1, false, false));
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 40, 255, false, false));
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 20 * 40, 255, false, false));
                         player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
-                        plugin.getMessages().sendTitle(player, "titles.scatter.title", "titles.scatter.subtitle", 10, 40, 10);
+                        Title title = Title.title(
+                                TextUtil.parse("<gold><bold>¡Cargando mundo!</bold>"),
+                                TextUtil.parse("<yellow>Espera a que tus chunks carguen..."),
+                                Title.Times.times(Duration.ofMillis(200), Duration.ofMillis(1500), Duration.ofMillis(300))
+                        );
+                        player.showTitle(title);
                     });
                 }
             }
         }.runTaskTimer(plugin, 2L, 4L);
+    }
+
+    private void createCage(Location center) {
+        World w = center.getWorld();
+        if (w == null) return;
+        int bx = center.getBlockX();
+        int by = center.getBlockY();
+        int bz = center.getBlockZ();
+
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+                Block floor = w.getBlockAt(bx + x, by - 1, bz + z);
+                setTempGlass(floor);
+
+                Block roof = w.getBlockAt(bx + x, by + 3, bz + z);
+                setTempGlass(roof);
+
+                if (x == -1 || x == 1 || z == -1 || z == 1) {
+                    Block wall1 = w.getBlockAt(bx + x, by, bz + z);
+                    Block wall2 = w.getBlockAt(bx + x, by + 1, bz + z);
+                    Block wall3 = w.getBlockAt(bx + x, by + 2, bz + z);
+                    setTempGlass(wall1);
+                    setTempGlass(wall2);
+                    setTempGlass(wall3);
+                }
+            }
+        }
+    }
+
+    private void setTempGlass(Block block) {
+        if (!originalBlockState.containsKey(block)) {
+            originalBlockState.put(block, block.getType());
+            block.setType(Material.GLASS);
+        }
+    }
+
+    public void cleanupCages() {
+        if (countdownTask != null) {
+            countdownTask.cancel();
+            countdownTask = null;
+        }
+        for (Map.Entry<Block, Material> entry : originalBlockState.entrySet()) {
+            Block b = entry.getKey();
+            b.setType(entry.getValue());
+        }
+        originalBlockState.clear();
+    }
+
+    private void startCountdown(Runnable onComplete) {
+        countdownTask = new BukkitRunnable() {
+            int seconds = 5;
+
+            @Override
+            public void run() {
+                if (seconds <= 0) {
+                    cancel();
+                    cleanupCages();
+                    scattering = false;
+
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        player.removePotionEffect(PotionEffectType.SLOWNESS);
+                    }
+
+                    plugin.getMessages().broadcast("scatter.completed");
+                    if (onComplete != null) {
+                        onComplete.run();
+                    }
+                    return;
+                }
+
+                String numColor = seconds <= 2 ? "<green>" : (seconds <= 3 ? "<yellow>" : "<gold>");
+                float pitch = 0.8f + ((5 - seconds) * 0.1f);
+
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, pitch);
+                    Title title = Title.title(
+                            TextUtil.parse(numColor + "<bold>" + seconds + "</bold>"),
+                            TextUtil.parse("<yellow>Cargando terreno..."),
+                            Title.Times.times(Duration.ZERO, Duration.ofMillis(1200), Duration.ofMillis(200))
+                    );
+                    player.showTitle(title);
+                }
+
+                seconds--;
+            }
+        }.runTaskTimer(plugin, 10L, 20L);
     }
 
     private List<int[]> generateSpacedPoints(int radius, int count) {
