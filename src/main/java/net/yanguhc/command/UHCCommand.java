@@ -88,6 +88,24 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
                 }
                 plugin.getGameManager().enablePvP();
             }
+            case "teamsize", "teams", "team-size" -> {
+                if (args.length < 2) {
+                    TextUtil.sendMessage(sender, "<yellow>Tamaño actual de equipos: <gold>" + plugin.getTeamManager().getMaxTeamSize() + " jugadores por equipo.");
+                    TextUtil.sendMessage(sender, "<gray>Uso: /uhc teamsize <número>");
+                    return true;
+                }
+                try {
+                    int size = Integer.parseInt(args[1]);
+                    if (size < 1) {
+                        TextUtil.sendMessage(sender, "<red>El tamaño de equipo debe ser al menos 1.");
+                        return true;
+                    }
+                    plugin.getTeamManager().setMaxTeamSize(size);
+                    TextUtil.sendMessage(sender, "<green>Tamaño de equipo configurado a: <gold>" + size + " jugadores por equipo.");
+                } catch (NumberFormatException e) {
+                    TextUtil.sendMessage(sender, "<red>Por favor ingresa un número entero válido.");
+                }
+            }
             case "border" -> {
                 handleBorder(sender, args);
             }
@@ -272,6 +290,7 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
     private void sendHelp(CommandSender sender) {
         TextUtil.sendMessage(sender, "<gold><bold>=== YangUHC Comandos de Administración ===");
         TextUtil.sendMessage(sender, "<yellow>/uhc config <gray>- Configuración interactiva previa (Borde, Kits, PvP, Teams).");
+        TextUtil.sendMessage(sender, "<yellow>/uhc teamsize <número> <gray>- Configura el tamaño de los equipos.");
         TextUtil.sendMessage(sender, "<yellow>/uhc start <gray>- Inicia la partida UHC.");
         TextUtil.sendMessage(sender, "<yellow>/uhc stop <gray>- Detiene la partida actual.");
         TextUtil.sendMessage(sender, "<yellow>/uhc forcepvp <gray>- Activa el PvP inmediatamente.");
@@ -291,7 +310,7 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 1) {
-            List<String> subs = Arrays.asList("config", "start", "stop", "scenarios", "forcepvp", "border", "kit", "kits", "setlobby", "setspawn", "revive", "reload");
+            List<String> subs = Arrays.asList("config", "teamsize", "start", "stop", "scenarios", "forcepvp", "border", "kit", "kits", "setlobby", "setspawn", "revive", "reload");
             return filter(subs, args[0]);
         }
 

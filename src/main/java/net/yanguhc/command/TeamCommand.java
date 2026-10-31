@@ -51,6 +51,28 @@ public class TeamCommand implements CommandExecutor, TabCompleter {
                 plugin.getTeamManager().createRandomTeams();
                 TextUtil.broadcast("<green>¡Equipos asignados aleatoriamente por un administrador!");
             }
+            case "size", "maxsize", "setsize" -> {
+                if (!player.hasPermission("yanguhc.admin") && !player.hasPermission("yanguhc.host") && !player.isOp()) {
+                    plugin.getMessages().send(player, "general.no-permission");
+                    return true;
+                }
+                if (args.length < 2) {
+                    TextUtil.sendMessage(player, "<yellow>Tamaño actual de equipos: <gold>" + plugin.getTeamManager().getMaxTeamSize() + " jugadores por equipo.");
+                    TextUtil.sendMessage(player, "<gray>Uso: /team size <número>");
+                    return true;
+                }
+                try {
+                    int size = Integer.parseInt(args[1]);
+                    if (size < 1) {
+                        TextUtil.sendMessage(player, "<red>El tamaño de equipo debe ser al menos 1.");
+                        return true;
+                    }
+                    plugin.getTeamManager().setMaxTeamSize(size);
+                    TextUtil.sendMessage(player, "<green>Tamaño de equipo configurado a: <gold>" + size + " jugadores por equipo.");
+                } catch (NumberFormatException e) {
+                    TextUtil.sendMessage(player, "<red>Por favor ingresa un número entero válido.");
+                }
+            }
             case "invite" -> {
                 if (args.length < 2) {
                     TextUtil.sendMessage(player, "<red>Uso: /team invite <jugador>");
@@ -121,6 +143,7 @@ public class TeamCommand implements CommandExecutor, TabCompleter {
         TextUtil.sendMessage(player, "<yellow>/team list <gray>- Lista todos los equipos registrados");
         TextUtil.sendMessage(player, "<yellow>/team info [jugador] <gray>- Muestra la información de un equipo");
         if (player.hasPermission("yanguhc.admin") || player.hasPermission("yanguhc.host") || player.isOp()) {
+            TextUtil.sendMessage(player, "<yellow>/team size <número> <gray>- Configura el tamaño máximo de los equipos");
             TextUtil.sendMessage(player, "<yellow>/team randomize <gray>- Asigna todos los jugadores a equipos aleatorios");
         }
         TextUtil.sendMessage(player, "<yellow>/tc <mensaje> <gray>- Habla por el chat exclusivo de tu equipo");
@@ -132,6 +155,7 @@ public class TeamCommand implements CommandExecutor, TabCompleter {
             List<String> options = new ArrayList<>(Arrays.asList("create", "invite", "accept", "leave", "list", "info", "help", "gui"));
             if (sender.hasPermission("yanguhc.admin") || sender.hasPermission("yanguhc.host") || sender.isOp()) {
                 options.add("randomize");
+                options.add("size");
             }
             return filter(options, args[0]);
         }

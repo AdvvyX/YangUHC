@@ -93,16 +93,17 @@ public class ConfigGUI implements Listener, InventoryHolder {
         inventory.setItem(14, graceItem);
 
         int teamSize = plugin.getTeamManager().getMaxTeamSize();
-        String teamMode = teamSize == 1 ? "Solos (1 Jugador)" : (teamSize == 2 ? "Dúos (2 Jugadores)" : "Tríos (3 Jugadores)");
-        ItemStack teamItem = new ItemBuilder(Material.SHIELD)
+        ItemStack teamItem = new ItemBuilder(Material.SHIELD, Math.min(64, Math.max(1, teamSize)))
                 .name("<gold><bold>Modalidad de Equipos</bold>")
                 .lore(
-                        "<gray>Modalidad: <aqua><bold>" + teamMode + "</bold>",
+                        "<gray>Modalidad: <aqua><bold>" + formatTeamMode(teamSize) + "</bold>",
                         "<dark_gray>Al iniciar la partida, los equipos se formarán automáticamente.",
                         "",
-                        "<gray>Opciones: <white>Solos ➜ Dúos ➜ Tríos",
+                        "<yellow>▶ Clic Izquierdo: <white>+1 Jugador",
+                        "<yellow>▶ Clic Derecho: <white>-1 Jugador",
+                        "<yellow>▶ Shift + Clic: <white>Restablecer a Solos (1)",
                         "",
-                        "<yellow>▶ Clic para cambiar modalidad"
+                        "<gray>O usa: <gold>/uhc teamsize <número>"
                 )
                 .build();
         inventory.setItem(16, teamItem);
@@ -117,6 +118,17 @@ public class ConfigGUI implements Listener, InventoryHolder {
                 )
                 .build();
         inventory.setItem(22, startItem);
+    }
+
+    private String formatTeamMode(int size) {
+        return switch (size) {
+            case 1 -> "Solos (1 Jugador)";
+            case 2 -> "Dúos (2 Jugadores)";
+            case 3 -> "Tríos (3 Jugadores)";
+            case 4 -> "Cuartetos (4 Jugadores)";
+            case 5 -> "Quintetos (5 Jugadores)";
+            default -> "Equipos de " + size + " Jugadores";
+        };
     }
 
     @EventHandler
@@ -167,7 +179,14 @@ public class ConfigGUI implements Listener, InventoryHolder {
             refresh();
         } else if (slot == 16) {
             int currentSize = plugin.getTeamManager().getMaxTeamSize();
-            int nextSize = currentSize >= 3 ? 1 : currentSize + 1;
+            int nextSize;
+            if (event.isShiftClick()) {
+                nextSize = 1;
+            } else if (event.isRightClick()) {
+                nextSize = currentSize <= 1 ? 10 : currentSize - 1;
+            } else {
+                nextSize = currentSize >= 10 ? 1 : currentSize + 1;
+            }
             plugin.getTeamManager().setMaxTeamSize(nextSize);
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1f, 1f);
             refresh();
