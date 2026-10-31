@@ -28,7 +28,7 @@ game:
   pvp-enabled: "<red><bold>¡EL PVP HA SIDO ACTIVADO!</bold> <gray>La protección de gracia ha expirado."
   deathmatch-started: "<dark_red><bold>¡DEATHMATCH INICIADO!</bold> <yellow>El borde se reduce al centro!"
   game-stopped: "<red><bold>BATTLE ROYALE</bold> <gray>» La partida ha sido detenida por un administrador."
-  reboot-countdown: "<gray>El servidor se reiniciará en <yellow>{seconds} segundos</yellow>..."
+  reboot-countdown: "<gray>Serás enviado al <gold>Spawn</gold> en <yellow>{seconds} segundos</yellow>..."
   spectator-eliminated: "<red>Has sido eliminado. Ahora estás en modo espectador."
   player-revived: "<green>¡Has sido revivido por un administrador!"
   player-revived-broadcast: "<yellow>{player} ha sido revivido en la partida."

@@ -37,7 +37,7 @@ public class TeamManager {
     }
 
     public boolean isTeamsEnabled() {
-        return maxTeamSize > 1;
+        return true;
     }
 
     public int getMaxTeamSize() {
@@ -114,36 +114,31 @@ public class TeamManager {
 
         Collections.shuffle(players);
 
-        if (maxTeamSize <= 1) {
-            for (Player p : players) {
-                String teamName = "Equipo " + p.getName();
-                Team team = createTeam(p, teamName, false);
-                if (team != null) {
-                    plugin.getMessages().send(p, "teams.auto-created", "team", teamName);
-                }
+        int teamCap = Math.max(1, maxTeamSize);
+        Team currentTeam = null;
+        for (Player p : players) {
+            if (currentTeam == null || currentTeam.getMembers().size() >= teamCap) {
+                String teamName = "Equipo #" + (teams.size() + 1);
+                currentTeam = createTeam(p, teamName, false);
+            } else {
+                currentTeam.addMember(p.getUniqueId());
+                playerTeamMap.put(p.getUniqueId(), currentTeam);
             }
-        } else {
-            Team currentTeam = null;
-            for (Player p : players) {
-                if (currentTeam == null || currentTeam.getMembers().size() >= maxTeamSize) {
-                    String teamName = "Equipo #" + (teams.size() + 1);
-                    currentTeam = createTeam(p, teamName, false);
-                } else {
-                    currentTeam.addMember(p.getUniqueId());
-                    playerTeamMap.put(p.getUniqueId(), currentTeam);
-                }
-            }
+        }
 
-            for (Team team : teams.values()) {
-                List<String> memberNames = new ArrayList<>();
-                for (UUID u : team.getMembers()) {
-                    Player mp = Bukkit.getPlayer(u);
-                    if (mp != null) memberNames.add(mp.getName());
-                }
-                String namesStr = String.join(", ", memberNames);
-                for (UUID u : team.getMembers()) {
-                    Player mp = Bukkit.getPlayer(u);
-                    if (mp != null) {
+        for (Team team : teams.values()) {
+            List<String> memberNames = new ArrayList<>();
+            for (UUID u : team.getMembers()) {
+                Player mp = Bukkit.getPlayer(u);
+                if (mp != null) memberNames.add(mp.getName());
+            }
+            String namesStr = String.join(", ", memberNames);
+            for (UUID u : team.getMembers()) {
+                Player mp = Bukkit.getPlayer(u);
+                if (mp != null) {
+                    if (team.getMembers().size() <= 1) {
+                        TextUtil.sendMessage(mp, "<gold>¡Equipo Asignado! <gray>Perteneces a " + team.getColorTag() + team.getName());
+                    } else {
                         TextUtil.sendMessage(mp, "<gold>¡Equipo Asignado! <gray>Perteneces a " + team.getColorTag() + team.getName() + " <gray>con: <yellow>" + namesStr);
                     }
                 }

@@ -306,12 +306,32 @@ public class GameManager {
 
         String winnerName = "Nadie";
         if (winnerObj instanceof Team team) {
-            winnerName = team.getName();
+            if (team.getMembers().size() == 1) {
+                UUID soloUuid = team.getMembers().iterator().next();
+                Player soloPlayer = Bukkit.getPlayer(soloUuid);
+                winnerName = team.getName() + (soloPlayer != null ? " (" + soloPlayer.getName() + ")" : "");
+            } else {
+                winnerName = team.getName();
+            }
         } else if (winnerObj instanceof Player player) {
-            winnerName = player.getName();
+            Team team = plugin.getTeamManager().getTeam(player);
+            if (team != null) {
+                winnerName = team.getName() + " (" + player.getName() + ")";
+            } else {
+                winnerName = player.getName();
+            }
         } else if (winnerObj instanceof UUID uuid) {
             Player p = Bukkit.getPlayer(uuid);
-            winnerName = p != null ? p.getName() : uuid.toString();
+            if (p != null) {
+                Team team = plugin.getTeamManager().getTeam(p);
+                if (team != null) {
+                    winnerName = team.getName() + " (" + p.getName() + ")";
+                } else {
+                    winnerName = p.getName();
+                }
+            } else {
+                winnerName = uuid.toString();
+            }
         } else if (winnerObj instanceof String str) {
             winnerName = str;
         }
