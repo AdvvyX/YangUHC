@@ -104,6 +104,7 @@ public class GameManager {
 
         for (Player p : Bukkit.getOnlinePlayers()) {
             alivePlayers.add(p.getUniqueId());
+            p.setInvulnerable(false);
             p.setGameMode(GameMode.SURVIVAL);
             p.setHealth(20.0);
             p.setFoodLevel(20);
@@ -274,6 +275,11 @@ public class GameManager {
         plugin.getMessages().broadcast("game.game-ended", "winner", winnerName);
 
         for (Player p : Bukkit.getOnlinePlayers()) {
+            p.setInvulnerable(true);
+            p.setFireTicks(0);
+            p.setHealth(20.0);
+            p.setFoodLevel(20);
+            p.setSaturation(20.0f);
             p.playSound(p.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1f, 1f);
             plugin.getMessages().sendTitle(p, "titles.victory.title", "titles.victory.subtitle", 10, 100, 20, "winner", winnerName);
         }
@@ -299,6 +305,7 @@ public class GameManager {
 
     public void prepareLobbyPlayer(Player player) {
         if (player == null) return;
+        player.setInvulnerable(false);
         player.teleport(plugin.getWorldManager().getLobbySpawn());
         player.setGameMode(GameMode.ADVENTURE);
         player.setHealth(20.0);

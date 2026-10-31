@@ -49,7 +49,6 @@ public class GameListener implements Listener {
             plugin.getGameManager().prepareLobbyPlayer(player);
             plugin.getMessages().send(player, "general.welcome");
         } else {
-
             if (!plugin.getGameManager().isAlive(player)) {
                 plugin.getGameManager().setSpectator(player);
                 player.teleport(plugin.getWorldManager().getUhcWorld().getSpawnLocation());
@@ -70,6 +69,11 @@ public class GameListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDeath(PlayerDeathEvent event) {
+        if (plugin.getGameManager().getState() == GameState.ENDED) {
+            event.setCancelled(true);
+            return;
+        }
+
         Player player = event.getPlayer();
         Player killer = player.getKiller();
 
@@ -97,7 +101,6 @@ public class GameListener implements Listener {
                 }
 
                 plugin.getGameManager().setSpectator(player);
-
                 Location specLoc = deathLoc.clone().add(0, 1.2, 0);
                 if (specLoc.getY() < 10) {
                     specLoc.setY(64);
@@ -150,9 +153,9 @@ public class GameListener implements Listener {
         if (!(event.getEntity() instanceof Player player)) return;
 
         GameState state = plugin.getGameManager().getState();
-        if (state == GameState.LOBBY || state == GameState.SCATTERING) {
+        if (state == GameState.LOBBY || state == GameState.SCATTERING || state == GameState.ENDED) {
             event.setCancelled(true);
-            if (player.getLocation().getY() < -20) {
+            if (state == GameState.LOBBY && player.getLocation().getY() < -20) {
                 player.teleport(plugin.getWorldManager().getLobbySpawn());
             }
             return;
@@ -202,14 +205,14 @@ public class GameListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onRegen(EntityRegainHealthEvent event) {
         if (event.getEntity() instanceof Player && event.getRegainReason() == EntityRegainHealthEvent.RegainReason.SATIATED) {
-
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onFoodLoss(FoodLevelChangeEvent event) {
-        if (plugin.getGameManager().getState() == GameState.LOBBY) {
+        GameState state = plugin.getGameManager().getState();
+        if (state == GameState.LOBBY || state == GameState.SCATTERING || state == GameState.ENDED) {
             event.setCancelled(true);
         }
     }
