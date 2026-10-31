@@ -11,12 +11,24 @@ import org.bukkit.entity.Player;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class TextUtil {
 
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
     private static final LegacyComponentSerializer SECTION_SERIALIZER = LegacyComponentSerializer.legacySection();
     private static final LegacyComponentSerializer AMPERSAND_SERIALIZER = LegacyComponentSerializer.legacyAmpersand();
+
+    // Regex patterns for hex RGB formats
+    private static final Pattern HEX_AMP_6 = Pattern.compile("&#([a-fA-F0-9]{6})");
+    private static final Pattern HEX_BRACKET_6 = Pattern.compile("\\{#([a-fA-F0-9]{6})\\}");
+    private static final Pattern HEX_BARE_6 = Pattern.compile("(?<![<:;#&])#([a-fA-F0-9]{6})");
+    private static final Pattern HEX_AMP_3 = Pattern.compile("&#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])(?![a-fA-F0-9])");
+    private static final Pattern HEX_BARE_3 = Pattern.compile("(?<![<:;#&])#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])(?![a-fA-F0-9])");
+
+    // Legacy ampersand codes pattern (&0-9, &a-f, &k-o, &r)
+    private static final Pattern LEGACY_PATTERN = Pattern.compile("&([0-9a-fk-orA-FK-OR])");
 
     private TextUtil() {
     }
@@ -26,20 +38,76 @@ public final class TextUtil {
             return Component.empty();
         }
 
-        // If string contains MiniMessage tags (<tag>...</tag>)
-        if (input.contains("<") && input.contains(">")) {
-            try {
-                // If it also contains legacy & codes, convert & to section first
-                String translated = ChatColor.translateAlternateColorCodes('&', input);
-                // If it has MiniMessage tags, deserialize directly
-                return MINI_MESSAGE.deserialize(input);
-            } catch (Exception ignored) {
-            }
+        String processed = toMiniMessageFormat(input);
+        try {
+            return MINI_MESSAGE.deserialize(processed);
+        } catch (Exception e) {
+            String fallback = ChatColor.translateAlternateColorCodes('&', input);
+            return SECTION_SERIALIZER.deserialize(fallback);
+        }
+    }
+
+    public static String toMiniMessageFormat(String input) {
+        if (input == null || input.isEmpty()) {
+            return "";
         }
 
-        // Standard legacy format (&a, &l, §c, etc.)
-        String formatted = ChatColor.translateAlternateColorCodes('&', input);
-        return SECTION_SERIALIZER.deserialize(formatted);
+        String s = input.replace('§', '&');
+
+        // 1. Convert &#RRGGBB -> <#RRGGBB>
+        s = HEX_AMP_6.matcher(s).replaceAll("<#$1>");
+
+        // 2. Convert {#RRGGBB} -> <#RRGGBB>
+        s = HEX_BRACKET_6.matcher(s).replaceAll("<#$1>");
+
+        // 3. Convert bare #RRGGBB -> <#RRGGBB> (when not inside tags like <#RRGGBB> or <gradient:...>)
+        s = HEX_BARE_6.matcher(s).replaceAll("<#$1>");
+
+        // 4. Convert 3-digit shorthand &#RGB -> <#RRGGBB>
+        s = HEX_AMP_3.matcher(s).replaceAll("<#$1$1$2$2$3$3>");
+
+        // 5. Convert 3-digit shorthand #RGB -> <#RRGGBB>
+        s = HEX_BARE_3.matcher(s).replaceAll("<#$1$1$2$2$3$3>");
+
+        // 6. Convert legacy & codes to MiniMessage tags
+        Matcher matcher = LEGACY_PATTERN.matcher(s);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            char code = Character.toLowerCase(matcher.group(1).charAt(0));
+            String tag = getTagForLegacyCode(code);
+            matcher.appendReplacement(sb, Matcher.quoteReplacement(tag));
+        }
+        matcher.appendTail(sb);
+
+        return sb.toString();
+    }
+
+    private static String getTagForLegacyCode(char code) {
+        return switch (code) {
+            case '0' -> "<black>";
+            case '1' -> "<dark_blue>";
+            case '2' -> "<dark_green>";
+            case '3' -> "<dark_aqua>";
+            case '4' -> "<dark_red>";
+            case '5' -> "<dark_purple>";
+            case '6' -> "<gold>";
+            case '7' -> "<gray>";
+            case '8' -> "<dark_gray>";
+            case '9' -> "<blue>";
+            case 'a' -> "<green>";
+            case 'b' -> "<aqua>";
+            case 'c' -> "<red>";
+            case 'd' -> "<light_purple>";
+            case 'e' -> "<yellow>";
+            case 'f' -> "<white>";
+            case 'k' -> "<obfuscated>";
+            case 'l' -> "<bold>";
+            case 'm' -> "<strikethrough>";
+            case 'n' -> "<underlined>";
+            case 'o' -> "<italic>";
+            case 'r' -> "<reset>";
+            default -> "&" + code;
+        };
     }
 
     public static String toLegacy(Component component) {
