@@ -26,6 +26,7 @@ public class GameManager {
     private int gracePeriodDuration = 1200;
     private int graceRemainingSeconds = 1200;
     private BukkitTask mainTimerTask;
+    private BukkitTask endGameTask;
 
     public GameManager(YangUHC plugin) {
         this.plugin = plugin;
@@ -253,7 +254,14 @@ public class GameManager {
 
     public void endGame(Object winnerObj) {
         setState(GameState.ENDED);
-        if (mainTimerTask != null) mainTimerTask.cancel();
+        if (mainTimerTask != null) {
+            mainTimerTask.cancel();
+            mainTimerTask = null;
+        }
+        if (endGameTask != null) {
+            endGameTask.cancel();
+            endGameTask = null;
+        }
         plugin.getKitManager().reset();
 
         String winnerName = "Nadie";
@@ -270,13 +278,14 @@ public class GameManager {
             plugin.getMessages().sendTitle(p, "titles.victory.title", "titles.victory.subtitle", 10, 100, 20, "winner", winnerName);
         }
 
-        new BukkitRunnable() {
+        endGameTask = new BukkitRunnable() {
             int countdown = 30;
 
             @Override
             public void run() {
                 if (countdown <= 0) {
                     cancel();
+                    endGameTask = null;
                     resetGame();
                     return;
                 }
@@ -312,6 +321,15 @@ public class GameManager {
         gameTimeSeconds = 0;
         graceRemainingSeconds = gracePeriodDuration;
 
+        if (mainTimerTask != null) {
+            mainTimerTask.cancel();
+            mainTimerTask = null;
+        }
+        if (endGameTask != null) {
+            endGameTask.cancel();
+            endGameTask = null;
+        }
+
         if (plugin.getWorldManager() != null && plugin.getWorldManager().getScatterManager() != null) {
             plugin.getWorldManager().getScatterManager().cleanupCages();
         }
@@ -336,7 +354,14 @@ public class GameManager {
             return false;
         }
         setState(GameState.LOBBY);
-        if (mainTimerTask != null) mainTimerTask.cancel();
+        if (mainTimerTask != null) {
+            mainTimerTask.cancel();
+            mainTimerTask = null;
+        }
+        if (endGameTask != null) {
+            endGameTask.cancel();
+            endGameTask = null;
+        }
         resetGame();
         plugin.getMessages().broadcast("game.game-stopped");
         return true;

@@ -30,6 +30,7 @@ public class ScatterManager {
     private final Random random = new Random();
     private boolean scattering = false;
     private final Map<Block, Material> originalBlockState = new HashMap<>();
+    private BukkitTask scatterTask;
     private BukkitTask countdownTask;
 
     public ScatterManager(YangUHC plugin, WorldManager worldManager) {
@@ -138,13 +139,18 @@ public class ScatterManager {
     }
 
     private void executeScatterTeleport(World world, List<List<Player>> groups, List<int[]> targetPoints, Runnable onComplete) {
-        new BukkitRunnable() {
+        if (scatterTask != null) {
+            scatterTask.cancel();
+        }
+
+        scatterTask = new BukkitRunnable() {
             int index = 0;
 
             @Override
             public void run() {
                 if (index >= groups.size()) {
                     cancel();
+                    scatterTask = null;
                     startCountdown(onComplete);
                     return;
                 }
@@ -214,10 +220,15 @@ public class ScatterManager {
     }
 
     public void cleanupCages() {
+        if (scatterTask != null) {
+            scatterTask.cancel();
+            scatterTask = null;
+        }
         if (countdownTask != null) {
             countdownTask.cancel();
             countdownTask = null;
         }
+        scattering = false;
         for (Map.Entry<Block, Material> entry : originalBlockState.entrySet()) {
             Block b = entry.getKey();
             b.setType(entry.getValue());
@@ -233,6 +244,7 @@ public class ScatterManager {
             public void run() {
                 if (seconds <= 0) {
                     cancel();
+                    countdownTask = null;
                     cleanupCages();
                     scattering = false;
 
