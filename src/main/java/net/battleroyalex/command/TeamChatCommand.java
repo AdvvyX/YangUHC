@@ -1,7 +1,6 @@
 package net.battleroyalex.command;
 
 import net.battleroyalex.BattleRoyaleX;
-import net.battleroyalex.util.TextUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -23,12 +22,7 @@ public class TeamChatCommand implements CommandExecutor {
         }
 
         if (args.length == 0) {
-            boolean active = plugin.getTeamManager().toggleTeamChat(player);
-            if (active) {
-                TextUtil.sendMessage(player, "<green>Chat de equipo <bold>activado</bold>. Todos tus mensajes irán a tu equipo.");
-            } else {
-                TextUtil.sendMessage(player, "<yellow>Chat de equipo <bold>desactivado</bold>. Ahora hablas por el chat global.");
-            }
+            plugin.getTeamManager().toggleTeamChat(player);
             return true;
         }
 
