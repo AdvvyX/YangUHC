@@ -1,11 +1,11 @@
 package net.yanguhc.world;
 
 import net.yanguhc.YangUHC;
-import net.yanguhc.util.TextUtil;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 
 import java.io.File;
+import java.util.Random;
 
 public class WorldManager {
 
@@ -40,7 +40,7 @@ public class WorldManager {
     }
 
     public World createUHCWorld(String name, World.Environment environment) {
-        plugin.getLogger().info("Generando o cargando mundo UHC: " + name);
+        plugin.getLogger().info("Generando nuevo mundo UHC: " + name);
         WorldCreator creator = new WorldCreator(name);
         creator.environment(environment);
         creator.type(WorldType.NORMAL);
@@ -49,6 +49,8 @@ public class WorldManager {
         long seed = plugin.getConfig().getLong("world.seed", 0);
         if (seed != 0) {
             creator.seed(seed);
+        } else {
+            creator.seed(new Random().nextLong());
         }
 
         World world = creator.createWorld();
@@ -56,6 +58,46 @@ public class WorldManager {
             setupGamerules(world);
         }
         return world;
+    }
+
+    public void regenerateUhcWorld(Runnable onComplete) {
+        String worldName = plugin.getConfig().getString("world.name", "uhc_world");
+        World existing = Bukkit.getWorld(worldName);
+        if (existing != null) {
+            Location lobby = getLobbySpawn();
+            for (Player p : existing.getPlayers()) {
+                p.teleport(lobby);
+            }
+            Bukkit.unloadWorld(existing, false);
+        }
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
+            deleteDirectory(worldFolder);
+
+            this.uhcWorld = createUHCWorld(worldName, World.Environment.NORMAL);
+            this.borderController = new BorderController(plugin, this.uhcWorld);
+            this.scatterManager = new ScatterManager(plugin, this);
+
+            if (onComplete != null) {
+                onComplete.run();
+            }
+        }, 10L);
+    }
+
+    private boolean deleteDirectory(File dir) {
+        if (dir == null || !dir.exists()) return true;
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File f : files) {
+                if (f.isDirectory()) {
+                    deleteDirectory(f);
+                } else {
+                    f.delete();
+                }
+            }
+        }
+        return dir.delete();
     }
 
     public void setupGamerules(World world) {

@@ -179,7 +179,6 @@ public class GameManager {
     }
 
     private void checkBorderSchedule(int seconds) {
-
         if (seconds == 1500) {
             plugin.getWorldManager().getBorderController().shrinkNextStage(120);
         } else if (seconds == 2400) {
@@ -317,10 +316,15 @@ public class GameManager {
             prepareLobbyPlayer(p);
         }
 
-        plugin.getWorldManager().getBorderController().resetBorder(
-                plugin.getConfig().getDouble("border.initial-radius", 1000.0)
-        );
         plugin.getKitManager().reset();
+
+        plugin.getWorldManager().regenerateUhcWorld(() -> {
+            if (plugin.getWorldManager().getBorderController() != null) {
+                plugin.getWorldManager().getBorderController().resetBorder(
+                        plugin.getConfig().getDouble("border.initial-radius", 1000.0)
+                );
+            }
+        });
     }
 
     public boolean stopGame() {
