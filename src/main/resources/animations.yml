@@ -1,0 +1,43 @@
+# =========================================================
+#                 YANG UHC - ANIMATIONS
+#   Inspirado en el sistema de animación del plugin TAB
+#   Usa en cualquier lugar: %animation:nombre% o {animation:nombre}
+# =========================================================
+
+animations:
+  titleAnimation:
+    change-interval: 200
+    texts:
+      - "<gold><bold>YANG UHC</bold>"
+      - "<yellow><bold>YANG UHC</bold>"
+      - "<white><bold>YANG UHC</bold>"
+      - "<yellow><bold>YANG UHC</bold>"
+      - "<gold><bold>YANG UHC</bold>"
+      - "<gradient:#FFAA00:#FF5555><bold>YANG UHC</bold></gradient>"
+      - "<gradient:#FF5555:#FFAA00><bold>YANG UHC</bold></gradient>"
+
+  nameAnimation:
+    change-interval: 100
+    texts:
+      - "W"
+      - "W I"
+      - "W I N"
+      - "W I N N"
+      - "W I N N E"
+      - "W I N N E R"
+
+  glowIp:
+    change-interval: 150
+    texts:
+      - "<yellow>play.yanguhc.net"
+      - "<gold>play.yanguhc.net"
+      - "<white>play.yanguhc.net"
+      - "<gold>play.yanguhc.net"
+
+  heartBeat:
+    change-interval: 250
+    texts:
+      - "<red>❤"
+      - "<dark_red>❤"
+      - "<red>❤"
+      - "<gold>❤"

@@ -40,7 +40,8 @@ public class ScoreboardManager {
 
     private void createDefaultScoreboardFile() {
         YamlConfiguration c = new YamlConfiguration();
-        c.set("title", "<gold><bold>YANG UHC</bold>");
+        c.set("title", "%animation:titleAnimation%");
+        c.set("update-interval-ticks", 2); // 2 ticks = 100ms for smooth animations
         c.set("server-ip", "play.yanguhc.net");
 
         c.set("layouts.LOBBY", Arrays.asList(
@@ -50,7 +51,7 @@ public class ScoreboardManager {
                 "<white>Equipo: <aqua>{team}",
                 "<white>Escenarios: <green>{scenarios_count} activos",
                 "",
-                "<yellow>{server_ip}",
+                "%animation:glowIp%",
                 "<gray><st>-------------------</st>"
         ));
 
@@ -73,7 +74,7 @@ public class ScoreboardManager {
                 "<white>Equipo: <yellow>{team}",
                 "",
                 "<white>Coords: <gray>{x}, {y}, {z}",
-                "<yellow>{server_ip}",
+                "%animation:glowIp%",
                 "<gray><st>-------------------</st>"
         ));
 
@@ -86,7 +87,7 @@ public class ScoreboardManager {
                 "<white>Equipo Kills: <gold>{team_kills}",
                 "<white>Coords: <gray>{x}, {y}, {z}",
                 "",
-                "<yellow>{server_ip}",
+                "%animation:glowIp%",
                 "<gray><st>-------------------</st>"
         ));
 
@@ -97,7 +98,7 @@ public class ScoreboardManager {
                 "<white>Sobrevivientes: <green>{alive}",
                 "<white>Kills: <gold>{kills}",
                 "",
-                "<yellow>{server_ip}",
+                "%animation:glowIp%",
                 "<gray><st>-------------------</st>"
         ));
 
@@ -121,6 +122,7 @@ public class ScoreboardManager {
         if (file != null) {
             this.config = YamlConfiguration.loadConfiguration(file);
         }
+        startTask();
     }
 
     public void registerPlayer(Player player) {
@@ -136,26 +138,29 @@ public class ScoreboardManager {
     private void startTask() {
         if (updateTask != null) updateTask.cancel();
 
+        long intervalTicks = Math.max(1, config != null ? config.getLong("update-interval-ticks", 2) : 2);
+
         updateTask = new BukkitRunnable() {
             @Override
             public void run() {
                 updateAll();
             }
-        }.runTaskTimer(plugin, 20L, 20L); // Update every second
+        }.runTaskTimer(plugin, intervalTicks, intervalTicks);
     }
 
     public void updateAll() {
         GameState state = plugin.getGameManager().getState();
-        String title = config.getString("title", "<gold><bold>YANG UHC</bold>");
-        List<String> template = config.getStringList("layouts." + state.name());
+        String rawTitle = config.getString("title", "%animation:titleAnimation%");
+        String animatedTitle = plugin.getAnimationManager().replaceAnimations(rawTitle);
 
+        List<String> template = config.getStringList("layouts." + state.name());
         if (template.isEmpty()) {
             template = config.getStringList("layouts.INGAME");
         }
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             UHCScoreboard board = scoreboards.computeIfAbsent(player.getUniqueId(), u -> new UHCScoreboard(player));
-            board.setTitle(title);
+            board.setTitle(animatedTitle);
 
             List<String> formatted = new ArrayList<>();
             for (String line : template) {
@@ -166,6 +171,9 @@ public class ScoreboardManager {
     }
 
     private String replacePlaceholders(String text, Player player, GameState state) {
+        // Resolve text animations first
+        String resolved = plugin.getAnimationManager().replaceAnimations(text);
+
         String ip = config.getString("server-ip", "play.yanguhc.net");
         int timerSeconds = plugin.getGameManager().getGameTimeSeconds();
         int graceRemaining = plugin.getGameManager().getGraceRemainingSeconds();
@@ -180,7 +188,7 @@ public class ScoreboardManager {
         int teamKills = team != null ? team.getKills() : kills;
         int scenariosCount = plugin.getScenarioManager().getEnabledScenarios().size();
 
-        return text
+        return resolved
                 .replace("{state}", state.getDisplayName())
                 .replace("{timer}", TimeUtil.formatSeconds(timerSeconds))
                 .replace("{pvp_timer}", TimeUtil.formatSeconds(graceRemaining))

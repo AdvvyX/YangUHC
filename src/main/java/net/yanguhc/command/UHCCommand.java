@@ -84,6 +84,7 @@ public class UHCCommand implements CommandExecutor, TabCompleter {
             }
             case "reload" -> {
                 plugin.getMessages().reload();
+                plugin.getAnimationManager().reload();
                 plugin.getScoreboardManager().reload();
                 plugin.getKitManager().loadKits();
                 plugin.reloadConfig();

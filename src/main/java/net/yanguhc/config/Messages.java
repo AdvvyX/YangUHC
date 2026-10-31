@@ -60,6 +60,9 @@ public class Messages {
                 }
             }
         }
+        if (plugin.getAnimationManager() != null) {
+            msg = plugin.getAnimationManager().replaceAnimations(msg);
+        }
         return msg;
     }
 

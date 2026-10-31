@@ -1,5 +1,6 @@
 package net.yanguhc;
 
+import net.yanguhc.animation.AnimationManager;
 import net.yanguhc.command.*;
 import net.yanguhc.config.Messages;
 import net.yanguhc.game.GameManager;
@@ -21,6 +22,7 @@ public class YangUHC extends JavaPlugin {
     private static YangUHC instance;
 
     private Messages messages;
+    private AnimationManager animationManager;
     private WorldManager worldManager;
     private TeamManager teamManager;
     private KitManager kitManager;
@@ -41,8 +43,9 @@ public class YangUHC extends JavaPlugin {
         // Save default configuration
         saveDefaultConfig();
 
-        // Initialize Messages
+        // Initialize Messages & Animations
         this.messages = new Messages(this);
+        this.animationManager = new AnimationManager(this);
 
         // Initialize Managers
         this.worldManager = new WorldManager(this);
@@ -88,6 +91,7 @@ public class YangUHC extends JavaPlugin {
         getLogger().info("======================================");
         getLogger().info("  YangUHC v" + getDescription().getVersion() + " iniciado exitosamente!");
         getLogger().info("  Escenarios: " + scenarioManager.getEnabledScenarios().size() + " activos");
+        getLogger().info("  Animaciones: " + animationManager.getAllAnimations().size() + " cargadas");
         getLogger().info("  Mundo UHC: " + (worldManager.getUhcWorld() != null ? worldManager.getUhcWorld().getName() : "Pendiente"));
         getLogger().info("======================================");
     }
@@ -97,7 +101,6 @@ public class YangUHC extends JavaPlugin {
         if (scoreboardManager != null) {
             scoreboardManager.shutdown();
         }
-
         getLogger().info("YangUHC ha sido desactivado.");
     }
 
@@ -107,6 +110,10 @@ public class YangUHC extends JavaPlugin {
 
     public Messages getMessages() {
         return messages;
+    }
+
+    public AnimationManager getAnimationManager() {
+        return animationManager;
     }
 
     public WorldManager getWorldManager() {
