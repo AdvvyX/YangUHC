@@ -1,6 +1,6 @@
-# YangUHC
+# BattleRoyaleX
 
-Plugin completo, modular y de alto rendimiento de **Ultra Hardcore (UHC)** para Minecraft **1.21+** (Paper / Purpur).
+Plugin completo, modular y de alto rendimiento de **Battle Royale / UHC** para Minecraft **1.21+** (Paper / Purpur).
 
 ---
 
@@ -8,33 +8,36 @@ Plugin completo, modular y de alto rendimiento de **Ultra Hardcore (UHC)** para 
 
 ### 1. 📊 Scoreboard Dinámico y Sin Parpadeos (Flickerless)
 - Sistema basado en buffers y prefijos por equipos nativos de Bukkit.
+- Soporte para animaciones de texto fluidas (`animations.yml`) estilo TAB.
 - Diseños dedicados por estado de la partida:
   - `LOBBY`: Jugadores, estado de equipo, escenarios activos, IP.
-  - `SCATTERING`: Progreso de preparación y teletransporte.
-  - `GRACE_PERIOD`: Tiempo de juego, temporizador de PvP, radio del borde, coordenadas.
+  - `SCATTERING`: Progreso de preparación y teletransporte asíncrono.
+  - `GRACE_PERIOD`: Tiempo de juego, temporizador de gracia/PvP, radio del borde, coordenadas.
   - `INGAME`: Kills personales, kills de equipo, borde actual y siguiente reducción.
   - `DEATHMATCH`: Borde final, supervivientes restantes.
-  - `ENDED`: Ganador y estadísticas finales.
+  - `ENDED`: Ganador y estadísticas finales con invulnerabilidad completa.
 - Configurable en `scoreboard.yml` con soporte para **MiniMessage** (`<red>`, `<gradient>`, etc.) y colores legacy (`&a`).
 
 ### 2. 🌍 Loader World Custom & Border Controller
-- Generación y carga del mundo UHC dedicado (`uhc_world`) y lobby (`world`).
-- Aplicación estricta de GameRules UHC:
+- Generación y carga del mundo Battle Royale dedicado (`uhc_world`) y lobby (`world`).
+- Regeneración automática y limpia del mundo al terminar o detener la partida.
+- Filtro de biomas feos en el scatter (evita océanos profundos, ríos y pantanos).
+- Aplicación estricta de GameRules:
   - `naturalRegeneration = false`
   - `doImmediateRespawn = true`
   - `pvp = false` (hasta fin de gracia)
   - Dificultad difícil y ciclo de día/noche.
 - **Controlador de Borde (WorldBorder)**:
-  - Radio inicial personalizable (por defecto `±1000`, 2000x2000 bloques).
+  - Radio inicial personalizable (por defecto `±1000`).
   - Reducciones programadas automáticas (`1000` -> `750` -> `500` -> `250` -> `100` -> `50` -> `25`).
   - Avisos sonoros y en pantalla.
-- **Scatter Seguro (Solo & Equipos)**:
-  - Distribución en espiral/círculo evitando océanos, lava y caídas al vacío.
-  - Los compañeros de equipo aparecen juntos o próximos.
-  - Efectos de resistencia y protección anti-caída mientras cargan chunks.
+- **Scatter Seguro y Precarga Asíncrona (Solo & Equipos)**:
+  - Precarga asíncrona de terreno (chunks 3x3) para teletransporte instantáneo sin lag.
+  - Cápsulas de cristal temporales con cuenta atrás de 5 segundos mientras carga el render.
+  - Los compañeros de equipo aparecen juntos.
 
 ### 3. 🧩 Sistema Modular de Escenarios (15 Escenarios Incluidos)
-Interfaz interactiva de 54 slots (`/scenarios`) y toggle en tiempo real:
+Interfaz interactiva de 54 slots (`/scenarios` o `/br scenarios`) con toggle en tiempo real:
 1. **CutClean**: Minerales y carnes caen cocinados; la grava siempre suelta pedernal.
 2. **TimeBomb**: El loot de los jugadores muertos se almacena en cofres con holograma de 30s antes de explotar.
 3. **Timber**: Talar un tronco rompe el árbol entero.
@@ -53,16 +56,16 @@ Interfaz interactiva de 54 slots (`/scenarios`) y toggle en tiempo real:
 
 ### 4. 🎒 Kits Predeterminados y Modificables con Delay
 - Configuración en `kits.yml`.
-- Kit inicial (`starter`) con armadura, herramientas, comida y materiales esenciales.
-- **Entrega retardada (Delay)**: Kits que se entregan tras cierto tiempo de partida (ej. drops de suministros a los 10 minutos).
-- Edición in-game: `/uhc kit create <nombre> [demora_seg]`, `/uhc kit preview <nombre>`, `/uhc kit setstarter <nombre>`.
+- Kit inicial (`starter`) y selector visual in-game (`/br kits`).
+- Entrega retardada (Delay) para drops o fases avanzadas.
+- Editor in-game: `/br kit create <nombre> [demora_seg]`, `/br kit preview <nombre>`, `/br kit setstarter <nombre>`.
 
-### 5. 👥 Sistema de Equipos (Teams)
-- Modos: Solo / FFA, To2, To3, To4 o tamaño personalizable.
-- GUI interactiva `/team`.
+### 5. 👥 Sistema de Equipos Numerados y Balanceo Aleatorio
+- Modos: Solos (`Equipo #1`, `Equipo #2`...), Dúos, Tríos o tamaño personalizable.
+- Asignación 100% aleatoria al iniciar con balanceo equitativo.
+- Tags visuales de equipo en Nametag (arriba de la cabeza), Tablist, Scoreboard y Chat.
 - Fuego amigo (`friendly-fire`) configurable.
-- Chat exclusivo de equipo con `/tc [mensaje]` o toggle.
-- Colores distintivos y teletransporte coordinado en el scatter.
+- Chat exclusivo de equipo con `/tc` o `/tc [mensaje]`.
 
 ---
 
@@ -70,23 +73,32 @@ Interfaz interactiva de 54 slots (`/scenarios`) y toggle en tiempo real:
 
 | Comando | Descripción | Permiso |
 |---|---|---|
-| `/uhc start` | Inicia el scatter y la partida | `yanguhc.admin` |
-| `/uhc stop` | Detiene la partida y restablece el lobby | `yanguhc.admin` |
-| `/uhc scenarios` | Abre la GUI administrativa de escenarios | `yanguhc.admin` |
-| `/uhc forcepvp` | Activa el PvP inmediatamente | `yanguhc.admin` |
-| `/uhc border <shrink\|set>` | Controla el tamaño y reducción del borde | `yanguhc.admin` |
-| `/uhc kit <create\|preview\|list>` | Administrador de kits | `yanguhc.admin` |
-| `/uhc revive <jugador>` | Revive a un jugador eliminado | `yanguhc.admin` |
-| `/uhc reload` | Recarga configuraciones | `yanguhc.admin` |
-| `/team` | Abre la interfaz de gestión de equipos | Todos |
-| `/tc [mensaje]` | Chat interno del equipo | Todos |
+| `/br start` | Abre la GUI de configuración e inicio rápido (o `/br start now`) | `battleroyale.admin` / `battleroyale.host` |
+| `/br stop` | Detiene la partida y restablece el lobby | `battleroyale.admin` |
+| `/br scenarios` | Abre la GUI administrativa de escenarios | `battleroyale.admin` |
+| `/br forcepvp` | Activa el PvP inmediatamente | `battleroyale.admin` |
+| `/br border <shrink\|set>` | Controla el tamaño y reducción del borde | `battleroyale.admin` |
+| `/br kits` | Abre el gestor visual de kits | `battleroyale.admin` |
+| `/br revive <jugador>` | Revive a un jugador eliminado | `battleroyale.admin` |
+| `/br setspawn` / `/br setlobby` | Establece el punto de aparición del Lobby | `battleroyale.admin` |
+| `/br teamsize <número>` | Configura el tamaño máximo de los equipos | `battleroyale.admin` |
+| `/br reload` | Recarga las configuraciones (`config.yml`, `messages.yml`, etc.) | `battleroyale.admin` |
+| `/team` | Abre la interfaz de equipos o información | Todos |
+| `/tc [mensaje]` | Alterna o envía mensajes al chat de equipo | Todos |
 | `/scenarios` | Consulta los escenarios activos en la partida | Todos |
+
+*Nota: `/uhc` sigue disponible como alias alternativo para los comandos principales.*
 
 ---
 
-## 📦 Compilación
+## 📦 Compilación y Requisitos
+
+- **Java**: JDK 21 o superior.
+- **Servidor**: Paper / Purpur 1.21 o superior.
+
+### Compilar desde la terminal:
 ```bash
 ./gradlew build
 ```
 El archivo JAR generado se encontrará en:
-`build/libs/YangUHC-1.0.0-SNAPSHOT.jar`
+`build/libs/BattleRoyaleX-1.0.0-SNAPSHOT.jar`
